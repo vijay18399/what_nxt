@@ -1,0 +1,99 @@
+ion-content{
+    --background: url(https://media.florim.com/media/sto/imgs/coll/prod/color/00A1835_panzoom@2x.jpg) 0 0/100% 100% no-repeat;
+  }
+  
+  .message {
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 4px;
+      white-space: pre-wrap;
+    }
+     
+    .my-message {
+      background: #fff;
+      color: black;
+    }
+  
+     
+    .time {
+      color: #0a0a0a;
+      float: right;
+      font-size: small;
+    }
+     
+    .message-input {
+      margin-top: 0px;
+      border: 1px solid var(--ion-color-medium);
+      border-radius: 10px;
+      background: #fff;
+    }
+     
+    .msg-btn {
+      --padding-start: 0.5em;
+      --padding-end: 0.5em;
+    }
+    .danger {
+      background-color: #FFAC7F;
+      color: black;
+    }
+    
+    .success {
+      background-color: #DCF8C6;
+      color: black;
+    }
+    
+    .default {
+      background-color:#99DBF4;
+      color: black;
+    }
+  
+
+
+  ion-content .scroll-content {
+      background-color: #f5f5f5;
+  }
+  .line-breaker {
+      white-space: pre-line;
+  }
+  .container {
+    .message {
+      position: relative;
+      padding: 7px 0;
+      .msg-content {
+          color: #343434;
+          background-color: #ddd;
+          float: left;        
+      }
+      .user-img {
+          position: absolute;
+          border-radius: 45px;
+          width: 45px;
+          height: 45px;
+          box-shadow: 0 0 2px rgba(0, 0, 0, 0.36);
+      }
+      .msg-detail {
+          width: 100%;
+          padding-left: 60px;
+          display: inline-block;
+          p {
+            margin: 0;
+          }
+          .msg-info {
+            p {
+              font-size: .8em;
+              color: #888;
+            }
+          }
+      }
+    }
+  }
+  .small-right{
+    text-align: right;
+    margin: 0px;
+    color: red;
+  }
+  .small-left{
+    text-align: left;
+    margin: 0px;
+    color: red;
+  }

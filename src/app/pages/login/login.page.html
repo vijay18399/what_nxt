@@ -1,0 +1,50 @@
+<ion-content>
+
+  <div class="logo-box">
+    <img src="https://image.flaticon.com/icons/svg/639/639344.svg" alt="">
+  </div>
+  <h2 class="center">What <b class="other">NXT</b></h2>
+
+  <div class="login-form">
+    <h2 text-center>
+      <small>Sign in to continue</small>
+    </h2>
+
+    <ion-list lines="none">
+      <ion-item>
+        <ion-label position="stacked">Full Name <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input [(ngModel)]="user.Name" required placeholder="Enter Input"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Number</ion-label>
+        <ion-select class="text-secondary" [(ngModel)]="user.phoneNumber"  >
+          <ion-select-option *ngFor= "let card of cards" value="{{card.phoneNumber}}">{{card.phoneNumber}}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+ <ion-item>
+      <ion-label>Gender</ion-label>
+      <ion-select  [(ngModel)]="user.Gender" placeholder="Select One">
+        <ion-select-option value="F">Female</ion-select-option>
+        <ion-select-option value="M">Male</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item>
+      <ion-label>Birth Date</ion-label>
+      <ion-datetime [(ngModel)]="user.BirthDate"   placeholder="Select Date"></ion-datetime>
+    </ion-item>
+  
+
+    </ion-list>
+
+    <ion-button mode="ios" color="success" expand="block" (click)="login()">
+      Confirm
+    </ion-button>
+
+    <p text-center>
+     please give permissions to confirm login
+    </p>
+  </div>
+
+</ion-content>

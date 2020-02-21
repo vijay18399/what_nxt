@@ -1,9 +1,28 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-
+import { AuthGuard } from './guards/auth.guard';
+import { AutoLoginGuard } from './guards/auto-login.guard';
 const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)},
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  {
+    path: 'login',
+    loadChildren: () => import('./pages/login/login.module').then( m => m.LoginPageModule),
+    canActivate: [AutoLoginGuard]
+  },
+  {
+    path: 'contacts/:phoneNumber',
+    loadChildren: () => import('./pages/contacts/contacts.module').then( m => m.ContactsPageModule),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'contacts/:phoneNumber/chat/:phoneNumber2',
+    loadChildren: () => import('./pages/chat/chat.module').then( m => m.ChatPageModule),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'search/:phoneNumber',
+    loadChildren: () => import('./pages/search/search.module').then( m => m.SearchPageModule)
+  },
 ];
 
 @NgModule({
