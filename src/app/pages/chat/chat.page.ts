@@ -7,8 +7,11 @@ import { Storage } from '@ionic/storage';
 import { finalize } from 'rxjs/operators';
 import { TextToSpeech } from '@ionic-native/text-to-speech/ngx';
 //  =====>
+import * as Tesseract from 'tesseract.js'
 import { FilePath } from '@ionic-native/file-path/ngx';
 import { ImagePicker } from '@ionic-native/image-picker/ngx';
+import { PreviewAnyFile } from '@ionic-native/preview-any-file';
+import { Downloader, NotificationVisibility } from '@ionic-native/downloader/ngx';
 import {
   MediaCapture,
   MediaFile,
@@ -19,6 +22,8 @@ import { Media, MediaObject } from '@ionic-native/media/ngx';
 import { StreamingMedia } from '@ionic-native/streaming-media/ngx';
 import { PhotoViewer } from '@ionic-native/photo-viewer/ngx';
 import { FileChooser } from '@ionic-native/file-chooser/ngx';
+import { DocumentViewer } from '@ionic-native/document-viewer/ngx';
+
 //   ====>
 
 const API_STORAGE_KEY = 'specialkey';
@@ -52,6 +57,8 @@ export class ChatPage implements OnInit {
                private photoViewer: PhotoViewer,
                private fileChooser: FileChooser,
                private filePath: FilePath,
+               private document: DocumentViewer,
+               private downloader: Downloader,
                private plt: Platform, private tts: TextToSpeech, public actionSheetController: ActionSheetController , private loadingCtrl: LoadingController, public alertCtrl: AlertController, private apiService: ApiService, private route: ActivatedRoute, private toastCtrl: ToastController, private router: Router, private socket: Socket) {
     this.route.queryParams.subscribe(params => {
       if (this.router.getCurrentNavigation().extras.state) {
@@ -226,10 +233,40 @@ export class ChatPage implements OnInit {
       this.tts.speak('In Desiciplinary act')
       .then(() => console.log('Success'))
       .catch((reason: any) => console.log(reason));
+    } else if (!message.isfile) {
+      if (message.from === this.data.from ) {
+          if (!message.isDeletedByMe) {
+            this.tts.speak(message.message)
+            .then(() => console.log('Success'))
+            .catch((reason: any) => console.log(reason));
+          }
+      } else {
+
+        if (!message.isDeletedByYou) {
+          this.tts.speak(message.message)
+          .then(() => console.log('Success'))
+          .catch((reason: any) => console.log(reason));
+        }
+      }
     } else {
-      this.tts.speak(message.message)
-      .then(() => console.log('Success'))
-      .catch((reason: any) => console.log(reason));
+      if (message.type !== 'audio' && message.type !== 'video' && message.type !== 'image') {
+        var request = {
+          uri:  'https://letchat-upload.herokuapp.com/' + message['file'],
+          title: message['original'],
+          description: '',
+          mimeType: message['mimeType'],
+          visibleInDownloadsUi: true,
+          notificationVisibility: NotificationVisibility['VisibleNotifyCompleted'],
+          destinationInExternalFilesDir: {
+              dirType: 'Downloads',
+              subPath: message['original']
+          }
+      };
+      this.downloader.download(request)
+      .then((location: string) => {alert('File downloaded at:'+location);})
+      .catch((error: any) =>{ alert(error); });
+
+      }
     }
 
   }
@@ -300,7 +337,7 @@ export class ChatPage implements OnInit {
           }
         }
         , {
-          text: 'Translate to English',
+          text: 'Translation',
           icon: 'eye',
           handler: () => {
             this.Translate(data);
@@ -359,25 +396,25 @@ export class ChatPage implements OnInit {
     const loading = await this.loadingCtrl.create();
     loading.present();
 
-    this.apiService.Translate(data).pipe(
+    this.apiService.Getoptions(data).pipe(
       finalize(() => loading.dismiss())
     )
       .subscribe(async res => {
         console.log(res);
         if (res['error']) {
           const alert = await this.alertCtrl.create({
-            header: 'Language Translation Failed',
+            header: 'Please Check Internet Connection',
             message: res['msg'],
             buttons: ['OK']
           });
           await alert.present();
         } else {
-          const alert = await this.alertCtrl.create({
-            header: 'Translation Completed',
-            message: '<ion-button size=\'small\' color=\'secondary\'>' + res['language'] + '</ion-button>' + res['message'] + '<br><ion-button size=\'small\' color=\'tertiary\'>English</ion-button> ' + res['result'],
-            buttons: ['OK']
-          });
-          await alert.present();
+          const navigationExtras = {
+            state: {
+              res
+            }
+          };
+          this.router.navigate(['lang'], navigationExtras);
         }
 
       });

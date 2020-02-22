@@ -25,6 +25,8 @@ import { StreamingMedia } from '@ionic-native/streaming-media/ngx';
 import { PhotoViewer } from '@ionic-native/photo-viewer/ngx';
 import { FileChooser } from '@ionic-native/file-chooser/ngx';
 import { FilePath } from '@ionic-native/file-path/ngx';
+import { DocumentViewer } from '@ionic-native/document-viewer/ngx';
+import { Downloader } from '@ionic-native/downloader/ngx';
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
@@ -44,6 +46,8 @@ import { FilePath } from '@ionic-native/file-path/ngx';
     StreamingMedia,
     PhotoViewer,
     FileChooser,
+    DocumentViewer,
+    Downloader,
     {
       provide: HAMMER_GESTURE_CONFIG,
       useClass: IonicGestureConfig

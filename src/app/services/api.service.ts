@@ -148,13 +148,14 @@ export class ApiService {
       take(1)
     );
   }
-  Translate(data) {
-    return this.http.post(`${environment.apiUrl2}/translate`, data).pipe(
+  Translate(data, modelId) {
+    const url = `${environment.apiUrl2}/translate_by/` + modelId;
+    return this.http.post(url, data).pipe(
       take(1)
     );
   }
-  DetectLang(data) {
-    return this.http.post(`${environment.apiUrl2}/detect`, data).pipe(
+  Getoptions(data) {
+    return this.http.post(`${environment.apiUrl2}/lang_options`, data).pipe(
       take(1)
     );
   }

@@ -23,6 +23,10 @@ const routes: Routes = [
     path: 'search/:phoneNumber',
     loadChildren: () => import('./pages/search/search.module').then( m => m.SearchPageModule)
   },
+  {
+    path: 'lang',
+    loadChildren: () => import('./pages/lang/lang.module').then( m => m.LangPageModule)
+  },
 ];
 
 @NgModule({
