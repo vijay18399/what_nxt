@@ -27,6 +27,10 @@ const routes: Routes = [
     path: 'lang',
     loadChildren: () => import('./pages/lang/lang.module').then( m => m.LangPageModule)
   },
+  {
+    path: 'filter',
+    loadChildren: () => import('./pages/filter/filter.module').then( m => m.FilterPageModule)
+  },
 ];
 
 @NgModule({

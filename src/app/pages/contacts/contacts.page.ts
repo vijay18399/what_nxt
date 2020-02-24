@@ -88,7 +88,7 @@ logout() {
     this.contacts.find(['displayName', 'phoneNumbers'], {filter: '', multiple: true})
     .then(data => {
       // tslint:disable-next-line: max-line-length
-      this.allContacts = data.filter(x => x.phoneNumbers != null &&  x.displayName != null &&  x['_objectInstance'].phoneNumbers[0].value.length > 10 && this.regex.test(x['_objectInstance'].phoneNumbers[0].value) && this.users.includes(this.Contactparser(x['_objectInstance'].phoneNumbers[0].value) )  );
+      this.allContacts = data.filter(x => x.phoneNumbers != null &&  x.displayName != null &&  x['_objectInstance'].phoneNumbers[0].value.length >= 10 && this.regex.test(x['_objectInstance'].phoneNumbers[0].value) && this.users.includes(this.Contactparser(x['_objectInstance'].phoneNumbers[0].value) )  );
   });
 }
 
