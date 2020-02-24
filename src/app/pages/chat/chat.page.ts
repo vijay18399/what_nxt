@@ -63,6 +63,8 @@ export class ChatPage implements OnInit {
     this.route.queryParams.subscribe(params => {
       if (this.router.getCurrentNavigation().extras.state) {
         this.userdata = this.router.getCurrentNavigation().extras.state.contact;
+        this.data.from = this.router.getCurrentNavigation().extras.state.phoneNumber;
+        this.data.to = this.router.getCurrentNavigation().extras.state.phoneNumber2;
       }
     });
 
@@ -121,12 +123,12 @@ export class ChatPage implements OnInit {
         this.TypingText = '';
     });
     this.socket.fromEvent(FSeenChannel).subscribe(message => {
-        console.log('SeenChannel');
+        console.log('FSeenChannel');
         this.loadData(true);
         this.UpdateMessageInLocalStorage(true);
     });
     this.socket.fromEvent(TSeenChannel).subscribe(message => {
-      console.log('SeenChannel');
+      console.log('TSeenChannel');
       this.loadData(true);
       this.UpdateMessageInLocalStorage(true);
   });
@@ -183,8 +185,6 @@ export class ChatPage implements OnInit {
   }
 
   loadData(refresh = false, refresher?) {
-    this.data.from = this.route.snapshot.paramMap.get('phoneNumber');
-    this.data.to = this.route.snapshot.paramMap.get('phoneNumber2');
     this.apiService.getMessages(refresh, this.data).subscribe(res => {
       this.messages = res;
       console.log(res);
@@ -236,9 +236,7 @@ export class ChatPage implements OnInit {
     console.log(this.data);
     this.data.message = '';
   }
-  isSeen(message) {
-    this.socket.emit('seen', message);
-  }
+
 
   UpdateMessageInLocalStorage(refresh = false, refresher?) {
     this.apiService.UpdateLocalMessages(refresh, this.data).subscribe(res => {

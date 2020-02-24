@@ -10,17 +10,17 @@ const routes: Routes = [
     canActivate: [AutoLoginGuard]
   },
   {
-    path: 'contacts/:phoneNumber',
+    path: 'contacts',
     loadChildren: () => import('./pages/contacts/contacts.module').then( m => m.ContactsPageModule),
     canActivate: [AuthGuard]
   },
   {
-    path: 'contacts/:phoneNumber/chat/:phoneNumber2',
+    path: 'chat',
     loadChildren: () => import('./pages/chat/chat.module').then( m => m.ChatPageModule),
     canActivate: [AuthGuard]
   },
   {
-    path: 'search/:phoneNumber',
+    path: 'search',
     loadChildren: () => import('./pages/search/search.module').then( m => m.SearchPageModule)
   },
   {
@@ -30,6 +30,18 @@ const routes: Routes = [
   {
     path: 'filter',
     loadChildren: () => import('./pages/filter/filter.module').then( m => m.FilterPageModule)
+  },
+  {
+    path: 'tab',
+    loadChildren: () => import('./pages/tab/tab.module').then( m => m.TabPageModule)
+  },
+  {
+    path: 'groups',
+    loadChildren: () => import('./pages/groups/groups.module').then( m => m.GroupsPageModule)
+  },
+  {
+    path: 'bots',
+    loadChildren: () => import('./pages/bots/bots.module').then( m => m.BotsPageModule)
   },
 ];
 

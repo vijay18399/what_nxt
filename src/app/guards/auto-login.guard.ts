@@ -24,7 +24,6 @@ export class AutoLoginGuard implements CanActivate {
     }
 
   canActivate(): Observable<boolean> {
-   
     return this.api.user.pipe(
       take(1),
       map(user => {
@@ -33,11 +32,13 @@ export class AutoLoginGuard implements CanActivate {
         } else {
           this.api.getUsers(true).subscribe(res => {
             this.users = res;
-            const r = 'contacts/' + this.api.getUserData();
+            const phoneNumber = this.api.getUserData();
+            const r = 'contacts';
             const users = this.users;
             const navigationExtras = {
               state: {
-                users
+                users,
+                phoneNumber
               }
             };
             console.log(this.users);

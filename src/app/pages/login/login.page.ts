@@ -60,11 +60,13 @@ this.loadData(true);
     .subscribe(res => {
       if (res) {
       const decoded = helper.decodeToken(res);
-      const r = 'contacts/' + decoded['phoneNumber'];
+      const r = 'contacts';
       const users = this.users;
+      const phoneNumber = decoded['phoneNumber'];
       const navigationExtras = {
         state: {
-          users
+          users,
+          phoneNumber
         }
       };
        this.router.navigate([r], navigationExtras);

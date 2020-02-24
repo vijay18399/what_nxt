@@ -35,6 +35,23 @@ export class ContactsPage implements OnInit {
     },
     {
       '_objectInstance': {
+     
+        'displayName': 'daddy',
+        'phoneNumbers': [
+          {
+            'id': '5',
+            'pref': false,
+            'value': '9912939959',
+            'type': 'mobile'
+          }
+        ],
+        
+  
+      },
+      'rawId': '4'
+    },
+    {
+      '_objectInstance': {
         'displayName': 'srujana',
         'phoneNumbers': [
           {
@@ -54,6 +71,7 @@ export class ContactsPage implements OnInit {
     this.activatedRoute.queryParams.subscribe(params => {
       if (this.router.getCurrentNavigation().extras.state) {
         this.users = this.router.getCurrentNavigation().extras.state.users;
+        this.mynumber = this.router.getCurrentNavigation().extras.state.phoneNumber;
         this.x = JSON.stringify(this.users);
         console.log(this.users);
       }
@@ -64,7 +82,7 @@ export class ContactsPage implements OnInit {
   ngOnInit() {
     this.socket.connect();
     this.plt.ready().then(() => {
-      this.mynumber = this.activatedRoute.snapshot.paramMap.get('phoneNumber');
+     // this.mynumber = this.activatedRoute.snapshot.paramMap.get('phoneNumber');
       this.getAllContacts();
     });
     if (this.allContacts.length === 0) {
@@ -99,23 +117,25 @@ logout() {
 }
 open(contact) {
  const phoneNumber2 = this.Contactparser(contact._objectInstance.phoneNumbers[0].value);
- const phoneNumber = this.activatedRoute.snapshot.paramMap.get('phoneNumber');
- const route = 'contacts/' + phoneNumber + '/chat/' + phoneNumber2;
+ const phoneNumber = this.mynumber;
+ const route = 'chat';
  const navigationExtras = {
   state: {
-    contact
+    contact,
+    phoneNumber,
+    phoneNumber2
   }
 };
  this.router.navigate([route], navigationExtras);
 }
 
-search(){
-  const phoneNumber = this.activatedRoute.snapshot.paramMap.get('phoneNumber');
-  const route = 'search/' + phoneNumber ;
+search() {
+  const phoneNumber =  this.mynumber;
+  const route = 'search';
   const contacts = this.allContacts;
   const navigationExtras = {
      state : {
-      contacts
+      contacts, phoneNumber
      }
  };
   this.router.navigate([route], navigationExtras);

@@ -8,11 +8,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 export class SearchPage implements OnInit {
   contacts = [];
   backup = [];
+  mynumber = '';
   constructor(private activatedRoute: ActivatedRoute, private router: Router) {
     this.activatedRoute.queryParams.subscribe(params => {
       if (this.router.getCurrentNavigation().extras.state) {
         this.contacts = this.router.getCurrentNavigation().extras.state.contacts;
         this.backup = this.contacts;
+        this.mynumber = this.router.getCurrentNavigation().extras.state.phoneNumber;
       }
     });
    }
@@ -28,11 +30,13 @@ export class SearchPage implements OnInit {
 
   open(contact) {
     const phoneNumber2 = this.Contactparser(contact._objectInstance.phoneNumbers[0].value);
-    const phoneNumber = this.activatedRoute.snapshot.paramMap.get('phoneNumber');
-    const route = 'contacts/' + phoneNumber + '/chat/' + phoneNumber2;
+    const phoneNumber = this.mynumber;
+    const route = 'chat';
     const navigationExtras = {
      state: {
-       contact
+       contact,
+       phoneNumber,
+       phoneNumber2
      }
    };
     this.router.navigate([route], navigationExtras);

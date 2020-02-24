@@ -38,8 +38,8 @@
         <img *ngIf="isbirthday(message.message)"  height='30px' src="https://image.flaticon.com/icons/svg/2451/2451787.svg" > 
         <img *ngIf="iscongratulation(message.message)"  height='130px' src="https://image.flaticon.com/icons/png/512/1629/1629891.png" > 
         
-        <div class="time" text-right><br>{{ message.createdAt | date:'short' }}  </div>
-        <span *ngIf="!message.isSeen" class="tick">{{isSeen(message) }}</span>
+        <div class="time"  text-right><br>{{ message.createdAt | date:'short' }}  </div>
+      
       </ion-col>
  
       <ion-col (click)="ShowMessage(message)" (press)="presentActionSheet(message,i)"   offset="3" size="9" *ngIf="message.to !== data.from" class="message my-message">
@@ -47,7 +47,7 @@
        <p  class="small-right" *ngIf="message.isTagged" color="getColor(message.TagName)" ><small>{{ message.TagName }}</small></p>
               <span *ngIf="!message.isDeletedByMe" >{{ message.message }} {{ message.original }}  </span> <span class="text-muted" *ngIf="message.isDeletedByMe"  >Message Deleted  </span>
               <img *ngIf="message.isBan"   height='30px' src="https://image.flaticon.com/icons/svg/564/564619.svg" >
-        <div class="time" text-right><br>{{ message.createdAt | date:'short' }}<span *ngIf="message.isSeen" class="tick">✔✔</span><span *ngIf="!message.isSeen" >✔✔</span></div>
+        <div class="time" text-right><br>{{ message.createdAt | date:'short' }} <span *ngIf="message.isSeen" class="tick">✔✔</span><span *ngIf="message.isDownloaded" class="tick">✔</span><span *ngIf="!message.isSeen" >✔✔</span></div>
       </ion-col>
     </ion-row>
   </ion-grid>
