@@ -1,9 +1,39 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>groups</ion-title>
+  <ion-toolbar color="white">
+    <ion-title>
+      <img height="35px" src="../../assets/logo.png">
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button  (click)="loadData(true)" >
+        <ion-icon name="refresh-circle"></ion-icon>
+      </ion-button>
+      <ion-button (click)="add()">
+        <ion-icon name="add"></ion-icon>
+      </ion-button>
+      
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-
+<ion-content class="bg">
+  <ion-list  *ngIf="groups.length > 0; else nogroups"   lines="none" class="app-list">
+<ion-item  *ngFor="let group of groups"   (click)="open(group)"    >
+     
+ 
+      <ion-avatar slot="start">
+        <img src="https://ui-avatars.com/api/?name={{ group.groupname }}&background=e91e63&color=fff">
+      </ion-avatar>
+      <ion-label>
+        <h2>{{ group.groupname }}</h2>
+        <p>{{ group.admin.Name }}</p>
+       
+      </ion-label>
+     
+    </ion-item>
+  </ion-list>
+  <ng-template #nocontacts>
+    <ion-item>
+      You are not a member in Any Group.
+    </ion-item>
+  </ng-template>
 </ion-content>

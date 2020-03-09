@@ -1,9 +1,21 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>bots</ion-title>
+  <ion-toolbar color="tertiary">
+    <ion-title>
+      What NXT
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-
+  <ion-list  lines="none" class="app-list">
+    <ion-item routerlink="bot"  (click)="open()" >
+          <ion-avatar slot="start">
+            <img src="https://ui-avatars.com/api/?name={{ doremon }}">
+          </ion-avatar>
+          <ion-label>
+            <h2>Doremon</h2>
+            <p>The Cat Robot</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
 </ion-content>

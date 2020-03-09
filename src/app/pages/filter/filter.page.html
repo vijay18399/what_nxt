@@ -4,11 +4,12 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-avatar slot="start" class="contact-avatar">
-      <img src="https://ui-avatars.com/api/?name={{ name }}" />
+      <img *ngIf="name"  src="https://ui-avatars.com/api/?name={{ name }}&background=02a9f4&color=fff" />
+      <img  *ngIf="groupname" src="https://ui-avatars.com/api/?name={{ groupname }}&background=e91e63&color=fff" />
     </ion-avatar>
     <ion-title (tap)="showContactProfile()">
       <ion-label>
-        <h2>{{ name }}</h2>
+        <h2>{{ name }} {{groupname}}</h2>
       </ion-label>
     </ion-title>
     <ion-buttons slot="end">
@@ -23,7 +24,22 @@
 <ion-content class="bg">
   <ion-grid  >
     <ion-row *ngFor="let message of messages; let i = index">
-      <ion-col     (click)="ShowMessage(message)"  size="9" (press)="presentActionSheet(message,i)"   *ngIf="message.to === data.from && !message.isBan" class="{{ getSentiment(message.score) }} message ">
+      <ion-col     (click)="ShowMessage(message)"  size="9" (press)="presentActionSheet(message,i)"   *ngIf="message.to === data.from && !message.isBan" class="{{ getSentiment(message) }} message ">
+        <p  class="small-left"   ><small>{{ message.name }}</small></p>
+        <div *ngIf="message.isForm && !message.isDeletedByMe">
+          <div *ngIf="message.voters.includes(user.phoneNumber)" >
+            <b>{{message.question}}</b><br>
+           <ul *ngFor= "let option of message.options; let k = index ">
+            <li  >{{ k+1 }}. {{option.name}}:  <progress  value="{{option.score}}" max="{{count}}"> {{option.score}}% </progress></li>
+         <!---   <progress  value="{{option.score}}" max="{{groups.members.length }}"> {{option.score}}% </progress>---->
+          </ul>
+          </div>
+          <div *ngIf="!message.voters.includes(user.phoneNumber)" >
+            <h2>{{message.question}}</h2><br>
+            <ion-button  *ngFor= "let option of message.options; let k = index " size="small"  fill="outline"  icon-only  item-right (click)="vote(message,k,option.name)">
+              vote for {{ option.name}}</ion-button>
+          </div>
+        </div>
         <img *ngIf="!message.isDeletedByYou && message.isfile"  height='25px' src="https://letchat-upload.herokuapp.com/{{message.ext}}.png" > 
       
         <p  class="small-right" *ngIf="message.isTagged" color="getColor(message.TagName)" ><small>   {{ message.TagName }}</small></p>
@@ -36,6 +52,21 @@
       </ion-col>
  
       <ion-col (click)="ShowMessage(message)" (press)="presentActionSheet(message,i)"   offset="3" size="9" *ngIf="message.to !== data.from" class="message my-message">
+        <p  class="small-left"   ><small>{{ message.name }}</small></p>
+        <div *ngIf="message.isForm && !message.isDeletedByMe">
+          <div *ngIf="message.voters.includes(user.phoneNumber)" >
+            <b>{{message.question}}</b><br>
+           <ul *ngFor= "let option of message.options; let k = index ">
+            <li  >{{ k+1 }}. {{option.name}}:  <progress  value="{{option.score}}" max="{{count}}"> {{option.score}}% </progress></li>
+         <!---   <progress  value="{{option.score}}" max="{{groups.members.length }}"> {{option.score}}% </progress>---->
+          </ul>
+          </div>
+          <div *ngIf="!message.voters.includes(user.phoneNumber)" >
+            <h2>{{message.question}}</h2><br>
+            <ion-button  *ngFor= "let option of message.options; let k = index " size="small"  fill="outline"  icon-only  item-right (click)="vote(message,k,option.name)">
+              vote for {{ option.name}}</ion-button>
+          </div>
+        </div>
         <img *ngIf="!message.isDeletedByMe && message.isfile "  height='25px' src="https://letchat-upload.herokuapp.com/{{message.ext}}.png" > 
        <p  class="small-right" *ngIf="message.isTagged" color="getColor(message.TagName)" ><small>{{ message.TagName }}</small></p>
               <span *ngIf="!message.isDeletedByMe" >{{ message.message }} {{ message.original }}  </span> <span class="text-muted" *ngIf="message.isDeletedByMe"  >Message Deleted  </span>

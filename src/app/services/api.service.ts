@@ -3,7 +3,7 @@ import { OfflineManagerService } from './offline-manager.service';
 import { NetworkService, ConnectionStatus } from './network.service';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, tap, take, catchError , switchMap} from 'rxjs/operators';
+import { map, tap, take, catchError, switchMap } from 'rxjs/operators';
 import { JwtHelperService } from '@auth0/angular-jwt';
 const helper = new JwtHelperService();
 import { BehaviorSubject, Observable, from } from 'rxjs';
@@ -19,9 +19,9 @@ export const TOKEN_KEY = 'jwt-token';
 export class ApiService {
   public user: Observable<any>;
   private userData = new BehaviorSubject(null);
-  constructor( private router: Router,private storage: Storage,private plt: Platform, private http: HttpClient, private networkService: NetworkService, private offlineManager: OfflineManagerService) {
+  constructor(private router: Router, private storage: Storage, private plt: Platform, private http: HttpClient, private networkService: NetworkService, private offlineManager: OfflineManagerService) {
     this.loadStoredToken();
-   }
+  }
 
   loadStoredToken() {
     const platformObs = from(this.plt.ready());
@@ -41,7 +41,7 @@ export class ApiService {
       })
     );
   }
-  
+
   getUsers(forceRefresh: boolean = false): Observable<any> {
     if (this.networkService.getCurrentNetworkStatus() == ConnectionStatus.Offline || !forceRefresh) {
       return from(this.getLocalData('users'));
@@ -55,16 +55,44 @@ export class ApiService {
       );
     }
   }
+  getGroups(forceRefresh: boolean = false): Observable<any> {
+    if (this.networkService.getCurrentNetworkStatus() == ConnectionStatus.Offline || !forceRefresh) {
+      return from(this.getLocalData('groups'));
+    } else {
+      return this.http.get(`https://bee-server.herokuapp.com/groups`).pipe(
+        map(res => res),
+        tap(res => {
+          console.log('returns real live API data');
+          this.setLocalData('groups', res);
+        })
+      );
+    }
+  }
+  addToGroups(data, gid): Observable<any> {
+    return this.http.post(`https://bee-server.herokuapp.com/addto/` + gid, data).pipe(
+      take(1),
+    );
+  }
+  CreateGroups(data): Observable<any> {
+    return this.http.post(`https://bee-server.herokuapp.com/creategroup`, data).pipe(
+      take(1),
+    );
+  }
+  UpdateGroup(data): Observable<any> {
+    return this.http.post(`https://bee-server.herokuapp.com/update`, data).pipe(
+      take(1),
+    );
+  }
 
   getMessages(forceRefresh: boolean = false, data): Observable<any> {
     if (this.networkService.getCurrentNetworkStatus() == ConnectionStatus.Offline || !forceRefresh) {
       return from(this.getLocalData(data.to));
     } else {
-     // tslint:disable-next-line: no-shadowed-variable
-     const  from = data.from;
-     const  to = data.to;
-     const  url = "https://bee-server.herokuapp.com/messages/" + from + "/" + to;
-     return this.http.get(url).pipe(
+      // tslint:disable-next-line: no-shadowed-variable
+      const from = data.from;
+      const to = data.to;
+      const url = "https://bee-server.herokuapp.com/messages/" + from + "/" + to;
+      return this.http.get(url).pipe(
         map(res => res),
         tap(res => {
           console.log('returns real live API data');
@@ -73,18 +101,34 @@ export class ApiService {
       );
     }
   }
-
-  UpdateLocalMessages(forceRefresh: boolean = false, data): Observable<any> {
-     const  from = data.from;
-     const  to = data.to;
-     const  url = "https://bee-server.herokuapp.com/messages/" + from + "/" + to;
-     return this.http.get(url).pipe(
+  getGMessages(forceRefresh: boolean = false, data): Observable<any> {
+    if (this.networkService.getCurrentNetworkStatus() === ConnectionStatus.Offline || !forceRefresh) {
+      return from(this.getLocalData(data.groupid));
+    } else {
+      // tslint:disable-next-line: no-shadowed-variable
+      const gid = data.groupid;
+      const url = 'https://bee-server.herokuapp.com/gmessages/' + gid;
+      return this.http.get(url).pipe(
         map(res => res),
         tap(res => {
-          console.log('Message added to storage');
-          this.setLocalData(data.to, res);
+          console.log('returns real live API data');
+          this.setLocalData(gid, res);
         })
       );
+    }
+  }
+
+  UpdateLocalMessages(forceRefresh: boolean = false, data): Observable<any> {
+    const from = data.from;
+    const to = data.to;
+    const url = "https://bee-server.herokuapp.com/messages/" + from + "/" + to;
+    return this.http.get(url).pipe(
+      map(res => res),
+      tap(res => {
+        console.log('Message added to storage');
+        this.setLocalData(data.to, res);
+      })
+    );
   }
 
   updateUser(user, data): Observable<any> {
@@ -112,6 +156,10 @@ export class ApiService {
     console.log('return local data!');
     return this.storage.get(`${API_STORAGE_KEY}-${key}`);
   }
+ async  getMyData() {
+    const token = await this.storage.get(TOKEN_KEY);
+     return(helper.decodeToken(token));
+  }
   getUserToken() {
     return this.userData.getValue();
   }
@@ -120,7 +168,10 @@ export class ApiService {
     const phoneNumber = this.getUserToken().phoneNumber;
     return phoneNumber;
   }
-  login(credentials: {Name: string, phoneNumber: string, Gender : string , BirthDate : string }) {
+  getUser() {
+    return this.userData.getValue();
+  }
+  login(credentials: { Name: string, phoneNumber: string, Gender: string, BirthDate: string }) {
     return this.http.post(`https://bee-server.herokuapp.com/login`, credentials).pipe(
       take(1),
       map(res => {
@@ -148,17 +199,16 @@ export class ApiService {
       take(1)
     );
   }
-  Translate(data, modelId) {
-    const url = `${environment.apiUrl2}/translate_by/` + modelId;
+  Translate(languages, text) {
+    const url = `${environment.apiUrl4}/translate`;
+    const data = {
+      text, languages
+    };
     return this.http.post(url, data).pipe(
       take(1)
     );
   }
-  Getoptions(data) {
-    return this.http.post(`${environment.apiUrl2}/lang_options`, data).pipe(
-      take(1)
-    );
-  }
+
   Upload(data) {
     return this.http.post(`${environment.apiUrl3}/upload`, data).pipe(
       take(1)

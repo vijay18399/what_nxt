@@ -1,0 +1,53 @@
+<ion-header>
+  <ion-toolbar color="success">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Recognized Text in the Image </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content fullscreen>
+  <ion-fab vertical="top" horizontal="end" slot="fixed">
+    <ion-fab-button color="success"  (click)="copy()"  >
+      <ion-icon name="copy"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <ion-card>
+    <ion-card-content   >
+      {{FinalResult}} 
+    </ion-card-content>
+  </ion-card>
+  <ion-card>
+    <ion-card-header >
+      Urls in Text  
+    </ion-card-header>
+    <ion-card-content  >
+      <ion-list  lines="none" class="app-list">
+        <ion-item  *ngFor="let url of urls"  (click)="open(url)"  >
+              <ion-label>
+                <h2>{{ url.raw }} </h2>
+                <p>{{ url.reason }}</p>
+              </ion-label>
+              <ion-button  color="success" size="small" (click)="copier(url)"   > <ion-icon name="copy"></ion-icon></ion-button>
+            </ion-item>
+          </ion-list>
+    </ion-card-content>
+  </ion-card>
+  <!--<ion-card>
+    <ion-card-header >
+      Mobile Numbers in Text  
+    </ion-card-header>
+    <ion-card-content  >
+      <ion-list  lines="none" class="app-list">
+        <ion-item  *ngFor="let number of numbers"  (click)="openNumber(number)"  >
+              <ion-label>
+                <h2>{{ number}} </h2>
+              </ion-label>
+              <ion-button  color="success" size="small" (click)="copier(number)"   > <ion-icon name="copy"></ion-icon></ion-button>
+            </ion-item>
+          </ion-list>
+    </ion-card-content>
+  </ion-card>--->
+</ion-content>
+
+

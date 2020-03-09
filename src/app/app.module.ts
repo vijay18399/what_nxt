@@ -27,19 +27,34 @@ import { FileChooser } from '@ionic-native/file-chooser/ngx';
 import { FilePath } from '@ionic-native/file-path/ngx';
 import { DocumentViewer } from '@ionic-native/document-viewer/ngx';
 import { Downloader } from '@ionic-native/downloader/ngx';
+import { FileOpener } from '@ionic-native/file-opener/ngx';
+import { OCR } from '@ionic-native/ocr/ngx';
+import { Clipboard } from '@ionic-native/clipboard/ngx';
+import { BrowserTab } from '@ionic-native/browser-tab/ngx';
+import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
+import { Base64ToGallery } from '@ionic-native/base64-to-gallery/ngx';
+import { CallNumber } from '@ionic-native/call-number/ngx';
+
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
   imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, SocketIoModule.forRoot(config),  IonicStorageModule.forRoot(), HttpClientModule],
   providers: [
     Contacts,
+    CallNumber,
+    BrowserTab,
+    Base64ToGallery,
     Sim,
+    OCR,
+    InAppBrowser,
     StatusBar,
+    Clipboard,
     SplashScreen,
     Network,
     TextToSpeech,
     ImagePicker,
     MediaCapture,
+    FileOpener,
     File,
     FilePath,
     Media,

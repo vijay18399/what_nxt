@@ -1,6 +1,4 @@
 <ion-header>
-  
-
   <ion-toolbar color="success">
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
@@ -10,28 +8,21 @@
 </ion-header>
 
 <ion-content  >
-
-
-<h1>{{payload.message}}( {{ language }} ) </h1>
-<h2><b *ngIf="result" >Result : {{result}}</b></h2>
-<ion-list >
-  <ion-item>
-    <ion-label position="stacked">Message <ion-text color="danger">*</ion-text></ion-label>
-    <ion-input [(ngModel)]="payload.message"  readonly ></ion-input>
-  </ion-item>
-<ion-item>
-  <ion-label>Select Language</ion-label>
-  <ion-select class="text-secondary" [(ngModel)]="modelId"  >
-    <ion-select-option *ngFor= "let language of languages" value="{{language.model}}">{{language.name}}
-    </ion-select-option>
-  </ion-select>
-</ion-item>
-
-</ion-list>
-<ion-button  mode="ios" color="success" expand="block" (click)="translate()">
-  Translate
-</ion-button>
-
-
-
+  <ion-card  >
+    
+    <ion-card-header>
+      <ion-card-subtitle>Detected Language {{ getLangName(detectedLanguage) }}</ion-card-subtitle>
+      <ion-card-content>
+        <h2> {{ text }}</h2> 
+         </ion-card-content>
+    </ion-card-header>
+  </ion-card>
+  <ion-card  *ngFor="let translation of translations"  >
+    <ion-card-header>
+      <ion-card-subtitle>{{ getLangName(translation.to) }}</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+   <h2> {{ translation.text }}</h2> 
+    </ion-card-content>
+  </ion-card>
 </ion-content>

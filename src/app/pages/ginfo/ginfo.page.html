@@ -1,0 +1,47 @@
+<ion-header>
+  <ion-toolbar color="white">
+    <ion-buttons slot="start" >
+      <ion-button   (click)="back()">
+        <ion-icon name="arrow-back-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-avatar slot="start" class="contact-avatar">
+      <img src="https://ui-avatars.com/api/?name={{ groupname }}&background=8795DE&color=fff" />
+    </ion-avatar>
+    <ion-title (tap)="showContactProfile()">
+      <ion-label>
+        <h2>{{ groupname }} </h2>
+        <p ><small class="text-muted">Members Count {{  count  }}</small></p>
+      </ion-label>
+    </ion-title>
+    <ion-buttons slot="end"  >
+    <ion-button *ngIf="admin.phoneNumber === user.phoneNumber "    (click)="add()">
+      <ion-icon name="add"></ion-icon>
+    </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list  lines="none" class="app-list">
+    <ion-item  *ngFor="let contact of GroupContacts"      >
+         
+     
+      <ion-avatar slot="start">
+        <img src="https://ui-avatars.com/api/?name={{ contact._objectInstance.displayName }}&background=e91e63&color=fff">
+      </ion-avatar>
+      <ion-label>
+        <h2>{{ contact._objectInstance.displayName }}</h2>
+        <p>{{ Contactparser(contact._objectInstance.phoneNumbers[0].value) }}</p>
+       
+      </ion-label>
+      <ion-button  *ngIf="Contactparser(contact._objectInstance.phoneNumbers[0].value)!=admin.phoneNumber && admin.phoneNumber==user.phoneNumber "  color="danger" size="small" (click)="Remove(Contactparser(contact._objectInstance.phoneNumbers[0].value))"   > <ion-icon name="trash"></ion-icon></ion-button>
+        </ion-item>
+        <ion-item  *ngFor="let y of x"      >
+          <ion-label>
+            <h2>{{y}}</h2>
+          </ion-label>
+           
+            </ion-item>
+      </ion-list>
+</ion-content>

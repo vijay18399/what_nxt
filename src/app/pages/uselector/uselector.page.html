@@ -1,0 +1,37 @@
+<ion-header translucent>
+  <ion-toolbar color="tertiary">
+    <ion-buttons slot="end">
+      <ion-back-button></ion-back-button>
+      <ion-button (click)="loadData(true)">
+        <ion-icon name="refresh-circle"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-searchbar (ionChange)="onSearchTerm($event)" placeholder="Search for User"></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="bg">
+
+  <ion-list *ngIf="allContacts.length > 0; else nocontacts" lines="none" class="app-list">
+    <ion-item *ngFor="let contact of allContacts">
+      <ion-checkbox slot="start" (ionChange)="add(contact)"></ion-checkbox>
+      <ion-avatar slot="start">
+        <img src="https://ui-avatars.com/api/?name={{ contact._objectInstance.displayName }}">
+      </ion-avatar>
+      <ion-label>
+        <h2>{{ contact._objectInstance.displayName }}</h2>
+        <p>{{ Contactparser(contact._objectInstance.phoneNumbers[0].value) }}</p>
+      </ion-label>
+
+    </ion-item>
+  </ion-list>
+  <ng-template #nocontacts>
+    <ion-item>
+      No Contacts found.
+    </ion-item>
+  </ng-template>
+</ion-content>
+<ion-footer class="ion-no-border">
+  <ion-toolbar>
+    <ion-button (click)="adder()" expand="block">Add to Group</ion-button>
+  </ion-toolbar>
+</ion-footer>

@@ -10,11 +10,6 @@ const routes: Routes = [
     canActivate: [AutoLoginGuard]
   },
   {
-    path: 'contacts',
-    loadChildren: () => import('./pages/contacts/contacts.module').then( m => m.ContactsPageModule),
-    canActivate: [AuthGuard]
-  },
-  {
     path: 'chat',
     loadChildren: () => import('./pages/chat/chat.module').then( m => m.ChatPageModule),
     canActivate: [AuthGuard]
@@ -33,16 +28,50 @@ const routes: Routes = [
   },
   {
     path: 'tab',
-    loadChildren: () => import('./pages/tab/tab.module').then( m => m.TabPageModule)
+    loadChildren: () => import('./pages/tab/tab.module').then( m => m.TabPageModule),
+    canActivate: [AuthGuard]
+  },  {
+    path: 'selector',
+    loadChildren: () => import('./pages/selector/selector.module').then( m => m.SelectorPageModule)
   },
   {
-    path: 'groups',
-    loadChildren: () => import('./pages/groups/groups.module').then( m => m.GroupsPageModule)
+    path: 'gchat',
+    loadChildren: () => import('./pages/gchat/gchat.module').then( m => m.GchatPageModule)
   },
   {
-    path: 'bots',
-    loadChildren: () => import('./pages/bots/bots.module').then( m => m.BotsPageModule)
+    path: 'form',
+    loadChildren: () => import('./pages/form/form.module').then( m => m.FormPageModule)
   },
+  {
+    path: 'bot',
+    loadChildren: () => import('./pages/bot/bot.module').then( m => m.BotPageModule)
+  },
+  {
+    path: 'ginfo',
+    loadChildren: () => import('./pages/ginfo/ginfo.module').then( m => m.GinfoPageModule)
+  },
+  {
+    path: 'ocr',
+    loadChildren: () => import('./pages/ocr/ocr.module').then( m => m.OcrPageModule)
+  },
+  {
+    path: 'canvas',
+    loadChildren: () => import('./pages/canvas/canvas.module').then( m => m.CanvasPageModule)
+  },
+  {
+    path: 'uselector',
+    loadChildren: () => import('./pages/uselector/uselector.module').then( m => m.UselectorPageModule)
+  },
+  {
+    path: 'result',
+    loadChildren: () => import('./pages/result/result.module').then( m => m.ResultPageModule)
+  },
+  {
+    path: 'spam',
+    loadChildren: () => import('./pages/spam/spam.module').then( m => m.SpamPageModule)
+  }
+
+ 
 ];
 
 @NgModule({

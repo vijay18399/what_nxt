@@ -1,15 +1,15 @@
 <ion-header>
-  <ion-toolbar color="tertiary">
+  <ion-toolbar color="white">
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-avatar slot="start" class="contact-avatar">
-      <img src="https://ui-avatars.com/api/?name={{ userdata._objectInstance.displayName }}" />
+      <img src="https://ui-avatars.com/api/?name={{ userdata._objectInstance.displayName }}&background=02a9f4&color=fff" />
     </ion-avatar>
     <ion-title (tap)="showContactProfile()">
       <ion-label>
         <h2>{{ userdata._objectInstance.displayName }}</h2>
-        <p    *ngIf="isTyping"><small class="text-muted">Typing {{  TypingText  }}</small></p>
+        <p    *ngIf="isTyping"><small class="text-muted">Typing....</small></p>
       </ion-label>
     </ion-title>
     <ion-buttons slot="end">
@@ -30,24 +30,21 @@
 <ion-content class="bg">
   <ion-grid  >
     <ion-row *ngFor="let message of messages; let i = index">
-      <ion-col     (click)="ShowMessage(message)"  size="9" (press)="presentActionSheet(message,i)"   *ngIf="message.to === data.from && !message.isBan" class="{{ getSentiment(message.score) }} message ">
-        <img *ngIf="!message.isDeletedByYou && message.isfile"  height='25px' src="https://letchat-upload.herokuapp.com/{{message.ext}}.png" > 
-      
+      <ion-col     (click)="ShowMessage(message)"  size="9" (press)="presentActionSheet(message,i)"   *ngIf="message.to === data.from && !message.isBan" class="{{ getSentiment(message) }} message ">
+        <img *ngIf="!message.isDeletedByYou && message.isfile"  height='25px' src="../../assets/{{message.ext}}.png" >       
         <p  class="small-right" *ngIf="message.isTagged" color="getColor(message.TagName)" ><small>   {{ message.TagName }}</small></p>
         <span  *ngIf="!message.isDeletedByYou"  >{{ message.message }} {{ message.original }}   </span>   <span class="text-muted" *ngIf="message.isDeletedByYou"  >Message Deleted  </span><img *ngIf="isspam(message.spamcheck)"  height='30px' src="https://image.flaticon.com/icons/svg/564/564619.svg" >
         <img *ngIf="isbirthday(message.message)"  height='30px' src="https://image.flaticon.com/icons/svg/2451/2451787.svg" > 
         <img *ngIf="iscongratulation(message.message)"  height='130px' src="https://image.flaticon.com/icons/png/512/1629/1629891.png" > 
-        
         <div class="time"  text-right><br>{{ message.createdAt | date:'short' }}  </div>
-      
       </ion-col>
  
       <ion-col (click)="ShowMessage(message)" (press)="presentActionSheet(message,i)"   offset="3" size="9" *ngIf="message.to !== data.from" class="message my-message">
-        <img *ngIf="!message.isDeletedByMe && message.isfile "  height='25px' src="https://letchat-upload.herokuapp.com/{{message.ext}}.png" > 
+        <img *ngIf="!message.isDeletedByMe && message.isfile "  height='25px' src="../../assets/{{message.ext}}.png" > 
        <p  class="small-right" *ngIf="message.isTagged" color="getColor(message.TagName)" ><small>{{ message.TagName }}</small></p>
               <span *ngIf="!message.isDeletedByMe" >{{ message.message }} {{ message.original }}  </span> <span class="text-muted" *ngIf="message.isDeletedByMe"  >Message Deleted  </span>
               <img *ngIf="message.isBan"   height='30px' src="https://image.flaticon.com/icons/svg/564/564619.svg" >
-        <div class="time" text-right><br>{{ message.createdAt | date:'short' }} <span *ngIf="message.isSeen" class="tick">✔✔</span><span *ngIf="message.isDownloaded" class="tick">✔</span><span *ngIf="!message.isSeen" >✔✔</span></div>
+        <div class="time" text-right><br>{{ message.createdAt | date:'short' }}</div>
       </ion-col>
     </ion-row>
   </ion-grid>
@@ -86,7 +83,7 @@
     <ion-col size="9" class="ion-no-padding">
       <ion-list lines="none" class="ion-no-padding">
         <ion-item>
-          <ion-button  shape="round"  fill="outline"  icon-only  item-right (click)="FileUpload()">
+          <ion-button color="tertiary" shape="round"  fill="outline"  icon-only  item-right (click)="FileUpload()">
             <ion-icon  name="folder"></ion-icon>
             </ion-button>
           <ion-input  [(ngModel)]="data.message" placeholder="Type your message" type="text" (ionChange)="TypeChecker($event)" ></ion-input>

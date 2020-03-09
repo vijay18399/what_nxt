@@ -5,6 +5,7 @@ import { ApiService } from '../../services/api.service';
 import { LoadingController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Socket } from 'ngx-socket-io';
+import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 @Component({
   selector: 'app-contacts',
   templateUrl: './contacts.page.html',
@@ -67,7 +68,7 @@ export class ContactsPage implements OnInit {
   ];
   x = '';
   // tslint:disable-next-line: max-line-length
-  constructor(private socket: Socket, private activatedRoute: ActivatedRoute, private router: Router, private contacts: Contacts, private apiService: ApiService, private plt: Platform, public loadingController: LoadingController) {
+  constructor(private iab: InAppBrowser, private socket: Socket, private activatedRoute: ActivatedRoute, private router: Router, private contacts: Contacts, private apiService: ApiService, private plt: Platform, public loadingController: LoadingController) {
     this.activatedRoute.queryParams.subscribe(params => {
       if (this.router.getCurrentNavigation().extras.state) {
         this.users = this.router.getCurrentNavigation().extras.state.users;
@@ -88,6 +89,9 @@ export class ContactsPage implements OnInit {
     if (this.allContacts.length === 0) {
       this.allContacts = this.r;
     }
+    this.socket.fromEvent(this.mynumber).subscribe(message => {
+       alert(JSON.stringify(message));
+  });
   }
 logout() {
   this.apiService.logout();
@@ -106,7 +110,7 @@ logout() {
     this.contacts.find(['displayName', 'phoneNumbers'], {filter: '', multiple: true})
     .then(data => {
       // tslint:disable-next-line: max-line-length
-      this.allContacts = data.filter(x => x.phoneNumbers != null &&  x.displayName != null &&  x['_objectInstance'].phoneNumbers[0].value.length >= 10 && this.regex.test(x['_objectInstance'].phoneNumbers[0].value) && this.users.includes(this.Contactparser(x['_objectInstance'].phoneNumbers[0].value) )  );
+      this.allContacts = data.filter(x => x.phoneNumbers != null &&  x.displayName != null &&  x['_objectInstance'].phoneNumbers[0].value.length >= 10 && this.regex.test(x['_objectInstance'].phoneNumbers[0].value) && this.users.includes(this.Contactparser(x['_objectInstance'].phoneNumbers[0].value) ) && this.Contactparser(x['_objectInstance'].phoneNumbers[0].value) !== this.mynumber  );
   });
 }
 
@@ -139,6 +143,16 @@ search() {
      }
  };
   this.router.navigate([route], navigationExtras);
+}
+browser(url) {
+  console.log(url);
+  const tarea_regex = /^(http|https)/;
+  if (tarea_regex.test(url.toLowerCase()) === true) {
+    const browser = this.iab.create(url, '_system');
+  } else {
+    const browser = this.iab.create('https://' + url, '_system');
+  }
+  
 }
 
 }

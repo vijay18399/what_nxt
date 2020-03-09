@@ -6,6 +6,7 @@ export const environment = {
   production: false,
   apiUrl2: 'https://letchats-services.herokuapp.com/api',
   apiUrl3: 'https://letchat-upload.herokuapp.com' ,
+  apiUrl4: 'https://tutorialq.herokuapp.com'
 };
 
 /*

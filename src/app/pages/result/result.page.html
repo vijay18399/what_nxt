@@ -1,0 +1,25 @@
+<ion-header>
+  <ion-toolbar color="success">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Poll Result </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+<ion-card>
+  <ion-card-header>
+    <ion-card-subtitle> maximum votes : {{  group.members.length }}</ion-card-subtitle>
+    <ion-card-title>{{message.question}}</ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    <div *ngFor= "let option of options; let k = index ">
+      <h6> {{option.name}}<b> ({{ ((option.score/group.members.length)*100).toFixed(2) }}%) </b>  <progress  value="{{option.score}}" max="{{count}}"> {{option.score}}% </progress>-{{option.score}} votes</h6>
+    <br>
+    <li *ngFor= "let item of option.votedby">{{ item.Name}} - {{ item.phoneNumber }}</li>  
+    </div>
+  </ion-card-content>
+  </ion-card>
+</ion-content>

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-
+import { ActivatedRoute, Router } from '@angular/router';
 @Component({
   selector: 'app-bots',
   templateUrl: './bots.page.html',
@@ -7,9 +7,11 @@ import { Component, OnInit } from '@angular/core';
 })
 export class BotsPage implements OnInit {
 
-  constructor() { }
+  constructor( private router : Router) { }
 
   ngOnInit() {
   }
-
+  open() {
+    this.router.navigate(['bot']);
+  }
 }

@@ -1,0 +1,39 @@
+<ion-header>
+  <ion-toolbar color="tertiary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title (tap)="showContactProfile()">
+      <ion-label>
+        <h2>Form Maker</h2>
+      </ion-label>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="add()">
+        <ion-icon  slot="icon-only"  name="add"></ion-icon>
+      </ion-button>
+      <ion-button (click)="minus()">
+        <ion-icon name="remove-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list lines="full" class="ion-no-margin ion-no-padding">
+    <ion-item>
+      <ion-label position="stacked">Your Question  <ion-text color="danger">*</ion-text></ion-label>
+      <ion-input required type="text" [(ngModel)]="question" ></ion-input>
+    </ion-item>
+    <ion-item   *ngFor="let option of options; let i = index " >
+      <ion-label position="stacked">Option {{i+1}} <ion-text color="danger">*</ion-text></ion-label>
+      <ion-input  [(ngModel)]="options[i].name"  placeholder="option {{ i+1 }}"  required="true" type="text"  ></ion-input>
+    </ion-item>
+    </ion-list>
+
+</ion-content>
+<ion-footer class="ion-no-border">
+  <ion-toolbar>
+    <ion-button  (click)="send()" expand="block">Post the Poll</ion-button>
+  </ion-toolbar>
+</ion-footer>

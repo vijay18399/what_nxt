@@ -32,6 +32,9 @@ export class FilterPage implements OnInit {
   opt = '';
   name = '';
   data = null;
+  groupname = '';
+  user = null;
+  count = null;
   // tslint:disable-next-line: max-line-length
   constructor(private imagePicker: ImagePicker,
               private mediaCapture: MediaCapture,
@@ -58,8 +61,13 @@ export class FilterPage implements OnInit {
         this.opt = this.router.getCurrentNavigation().extras.state.opt;
         this.name = this.router.getCurrentNavigation().extras.state.user_name;
         this.data = this.router.getCurrentNavigation().extras.state.data;
+        this.user = this.router.getCurrentNavigation().extras.state.user;
+        this.groupname = this.router.getCurrentNavigation().extras.state.group_name;
+        this.count = this.router.getCurrentNavigation().extras.state.count;
         if (this.opt === 'Media' ) {
           this.messages = this.messages.filter(x => x.isfile === true  );
+        } else if (this.opt === 'Form') {
+          this.messages = this.messages.filter(x => x.isForm === true  );
         } else {
           this.messages = this.messages.filter(x => x.TagName === this.opt  );
         }
@@ -70,14 +78,26 @@ export class FilterPage implements OnInit {
   ngOnInit() {
   }
   
-  getSentiment(sentiment) {
-    if (sentiment > 0.5) {
+  getSentiment(message) {
+    
+    if (message.isTagged) {
+      if (message.TagName === 'Important') {
+        return 'primary';
+      } else if (message.TagName === 'Personal') {
+        return 'tertiary';
+      } else if (message.TagName === 'Confidential') {
+        return 'dark';
+      }
+    } else{
+    if (message.score > 0.5) {
       return 'success';
-    } else if (sentiment < 0.0) {
+    } else if (message.score < 0.0) {
       return 'danger';
     } else {
       return 'default';
     }
+
+  }
   }
   isspam(str) {
     if (str === 'spam') {
@@ -301,32 +321,484 @@ export class FilterPage implements OnInit {
         await alert.present();
       });
   }
-  async Translate(data) {
-    const loading = await this.loadingCtrl.create();
-    loading.present();
+  
+  async Translate(x) {
+    const alert = await this.alertCtrl.create({
+      header: 'Select Languages to translate',
+      inputs: [
+        {
+          name: 'Hindi',
+          type: 'checkbox',
+          label: 'Hindi',
+          value: 'hi',
+          checked: false
+        },
 
-    this.apiService.Getoptions(data).pipe(
-      finalize(() => loading.dismiss())
-    )
-      .subscribe(async res => {
-        console.log(res);
-        if (res['error']) {
-          const alert = await this.alertCtrl.create({
-            header: 'Please Check Internet Connection',
-            message: res['msg'],
-            buttons: ['OK']
-          });
-          await alert.present();
-        } else {
-          const navigationExtras = {
-            state: {
-              res
-            }
-          };
-          this.router.navigate(['lang'], navigationExtras);
+        {
+          name: 'Telugu',
+          type: 'checkbox',
+          label: 'Telugu',
+          value: 'te'
+        },
+        {
+          name: 'English',
+          type: 'checkbox',
+          label: 'English',
+          value: 'en'
+        },
+        {
+          name: 'Afrikaans',
+          type: 'checkbox',
+          label: 'Afrikaans',
+          value: 'af'
+        },
+        {
+          name: 'Arabic',
+          type: 'checkbox',
+          label: 'Arabic',
+          value: 'ar'
+        },
+        {
+          name: 'Bulgarian',
+          type: 'checkbox',
+          label: 'Bulgarian',
+          value: 'bg'
+        },
+        {
+          name: 'Bangla',
+          type: 'checkbox',
+          label: 'Bangla',
+          value: 'bn'
+        },
+        {
+          name: 'Bosnian',
+          type: 'checkbox',
+          label: 'Bosnian',
+          value: 'bs'
+        },
+        {
+          name: 'Catalan',
+          type: 'checkbox',
+          label: 'Catalan',
+          value: 'ca'
+        },
+        {
+          name: 'Czech',
+          type: 'checkbox',
+          label: 'Czech',
+          value: 'cs'
+        },
+        {
+          name: 'Welsh',
+          type: 'checkbox',
+          label: 'Welsh',
+          value: 'cy'
+        },
+        {
+          name: 'Danish',
+          type: 'checkbox',
+          label: 'Danish',
+          value: 'da'
+        },
+        {
+          name: 'German',
+          type: 'checkbox',
+          label: 'German',
+          value: 'de'
+        },
+        {
+          name: 'Greek',
+          type: 'checkbox',
+          label: 'Greek',
+          value: 'el'
+        },
+        {
+          name: 'Spanish',
+          type: 'checkbox',
+          label: 'Spanish',
+          value: 'es'
+        },
+        {
+          name: 'Estonian',
+          type: 'checkbox',
+          label: 'Estonian',
+          value: 'et'
+        },
+        {
+          name: 'Persian',
+          type: 'checkbox',
+          label: 'Persian',
+          value: 'fa'
+        },
+        {
+          name: 'Finnish',
+          type: 'checkbox',
+          label: 'Finnish',
+          value: 'fi'
+        },
+        {
+          name: 'Filipino',
+          type: 'checkbox',
+          label: 'Filipino',
+          value: 'fil'
+        },
+        {
+          name: 'Fijian',
+          type: 'checkbox',
+          label: 'Fijian',
+          value: 'fj'
+        },
+        {
+          name: 'French',
+          type: 'checkbox',
+          label: 'French',
+          value: 'fr'
+        },
+        {
+          name: 'Irish',
+          type: 'checkbox',
+          label: 'Irish',
+          value: 'ga'
+        },
+        {
+          name: 'Hebrew',
+          type: 'checkbox',
+          label: 'Hebrew',
+          value: 'he'
+        },
+        {
+          name: 'Croatian',
+          type: 'checkbox',
+          label: 'Croatian',
+          value: 'hr'
+        },
+        {
+          name: 'Haitian Creole',
+          type: 'checkbox',
+          label: 'Haitian Creole',
+          value: 'ht'
+        },
+        {
+          name: 'Hungarian',
+          type: 'checkbox',
+          label: 'Hungarian',
+          value: 'hu'
+        },
+        {
+          name: 'Indonesian',
+          type: 'checkbox',
+          label: 'Indonesian',
+          value: 'id'
+        },
+        {
+          name: 'Icelandic',
+          type: 'checkbox',
+          label: 'Icelandic',
+          value: 'is'
+        },
+        {
+          name: 'Italian',
+          type: 'checkbox',
+          label: 'Italian',
+          value: 'it'
+        },
+        {
+          name: 'Japanese',
+          type: 'checkbox',
+          label: 'Japanese',
+          value: 'ja'
+        },
+        {
+          name: 'Kannada',
+          type: 'checkbox',
+          label: 'Kannada',
+          value: 'kn'
+        },
+        {
+          name: 'Korean',
+          type: 'checkbox',
+          label: 'Korean',
+          value: 'ko'
+        },
+        {
+          name: 'Lithuanian',
+          type: 'checkbox',
+          label: 'Lithuanian',
+          value: 'lt'
+        },
+        {
+          name: 'Latvian',
+          type: 'checkbox',
+          label: 'Latvian',
+          value: 'lt'
+        },
+        {
+          name: 'Malagasy',
+          type: 'checkbox',
+          label: 'Malagasy',
+          value: 'mg'
+        },
+        {
+          name: 'Maori',
+          type: 'checkbox',
+          label: 'Maori',
+          value: 'mi'
+        },
+        {
+          name: 'Malayalam',
+          type: 'checkbox',
+          label: 'Malayalam',
+          value: 'ml'
+        },
+        {
+          name: 'Malay',
+          type: 'checkbox',
+          label: 'Malay',
+          value: 'ms'
+        },
+        {
+          name: 'Maltese',
+          type: 'checkbox',
+          label: 'Maltese',
+          value: 'mt'
+        },
+        {
+          name: 'Hmong Daw',
+          type: 'checkbox',
+          label: 'Hmong Daw',
+          value: 'mww'
+        },
+        {
+          name: 'Norwegian',
+          type: 'checkbox',
+          label: 'Norwegian',
+          value: 'nb'
+        },
+        {
+          name: 'Dutch',
+          type: 'checkbox',
+          label: 'Dutch',
+          value: 'nl'
+        },
+        {
+          name: 'Querétaro Otomi',
+          type: 'checkbox',
+          label: 'Querétaro Otomi',
+          value: 'otq'
+        },
+        {
+          name: 'Punjabi',
+          type: 'checkbox',
+          label: 'Punjabi',
+          value: 'pa'
+        },
+        {
+          name: 'Polish',
+          type: 'checkbox',
+          label: 'Polish',
+          value: 'pl'
+        },
+        {
+          name: 'Portuguese (Brazil)',
+          type: 'checkbox',
+          label: 'Portuguese (Brazil)',
+          value: 'pt'
+        },
+        {
+          name: 'Portuguese (Portugal)',
+          type: 'checkbox',
+          label: 'Portuguese (Portugal)',
+          value: 'pt-pt'
+        },
+        {
+          name: 'Romanian',
+          type: 'checkbox',
+          label: 'Romanian',
+          value: 'ro'
+        },
+        {
+          name: 'Russian',
+          type: 'checkbox',
+          label: 'Russian',
+          value: 'ru'
+        },
+        {
+          name: 'Slovak',
+          type: 'checkbox',
+          label: 'Slovak',
+          value: 'sk'
+        },
+        {
+          name: 'Slovenian',
+          type: 'checkbox',
+          label: 'Slovenian',
+          value: 'sl'
+        },
+        {
+          name: 'Samoan',
+          type: 'checkbox',
+          label: 'Samoan',
+          value: 'sm'
+        },
+        {
+          name: 'Serbian (Cyrillic)',
+          type: 'checkbox',
+          label: 'Serbian (Cyrillic)',
+          value: 'sr-Cyrl'
+        },
+        {
+          name: 'Serbian (Latin)',
+          type: 'checkbox',
+          label: 'Serbian (Latin)',
+          value: 'sr-Latn'
+        },
+        {
+          name: 'Swedish',
+          type: 'checkbox',
+          label: 'Swedish',
+          value: 'sv'
+        },
+        {
+          name: 'Swahili',
+          type: 'checkbox',
+          label: 'Swahili',
+          value: 'sw'
+        },
+        {
+          name: 'Tamil',
+          type: 'checkbox',
+          label: 'Tamil',
+          value: 'ta'
+        },
+        {
+          name: 'Thai',
+          type: 'checkbox',
+          label: 'Thai',
+          value: 'th'
+        },
+        {
+          name: 'Klingon (Latin)',
+          type: 'checkbox',
+          label: 'Klingon (Latin)',
+          value: 'tlh-Latn'
+        },
+        {
+          name: 'Klingon (pIqaD)',
+          type: 'checkbox',
+          label: 'Klingon (pIqaD)',
+          value: 'tlh-Piqd'
+        },
+        {
+          name: 'Tongan',
+          type: 'checkbox',
+          label: 'Tongan',
+          value: 'to'
+        },
+        {
+          name: 'Turkish',
+          type: 'checkbox',
+          label: 'Turkish',
+          value: 'tr'
+        },
+        {
+          name: 'Tahitian',
+          type: 'checkbox',
+          label: 'Tahitian',
+          value: 'ty'
+        },
+        {
+          name: 'Ukrainian',
+          type: 'checkbox',
+          label: 'Ukrainian',
+          value: 'uk'
+        },
+        {
+          name: 'Urdu',
+          type: 'checkbox',
+          label: 'Urdu',
+          value: 'ur'
+        },
+        {
+          name: 'Vietnamese',
+          type: 'checkbox',
+          label: 'Vietnamese',
+          value: 'vi'
+        },
+        {
+          name: 'Yucatec Maya',
+          type: 'checkbox',
+          label: 'Yucatec Maya',
+          value: 'yua'
+        },
+        {
+          name: 'Cantonese (Traditional)',
+          type: 'checkbox',
+          label: 'Cantonese (Traditional)',
+          value: 'yue'
+        },
+        {
+          name: 'Chinese Simplified',
+          type: 'checkbox',
+          label: 'Chinese Simplified',
+          value: 'zh-Hans'
+        },
+        {
+          name: 'Chinese Traditional',
+          type: 'checkbox',
+          label: 'Chinese Traditional',
+          value: 'zh-Hant'
         }
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: () => {
+            console.log('Confirm Cancel');
+          }
+        }, {
+          text: 'Ok',
+          handler: (data) => {
+            const languages = data;
+            const text = x['message'];
+            this.StartTranslation(languages, text);
+          }
+        }
+      ]
+    });
 
-      });
+    await alert.present();
+  }
+
+  async StartTranslation(languages, text) {
+  console.log(languages, text );
+  const loading = await this.loadingCtrl.create();
+  loading.present();
+
+  this.apiService.Translate(languages, text).pipe(
+    finalize(() => loading.dismiss())
+  )
+    .subscribe(async res => {
+      if (res['statusCode'] !== 200) {
+        const alert = await this.alertCtrl.create({
+          header: 'Please Check Internet Connection',
+          message: res['msg'],
+          buttons: ['OK']
+        });
+        await alert.present();
+      } else {
+        console.log(res);
+        const navigationExtras = {
+          state: {
+            res, text
+          }
+        };
+        this.router.navigate(['lang'], navigationExtras);
+      }
+
+    });
+
   }
   speaker() {
     this.muted = !this.muted;

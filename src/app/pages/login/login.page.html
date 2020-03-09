@@ -1,9 +1,9 @@
 <ion-content>
 
   <div class="logo-box">
-    <img src="https://image.flaticon.com/icons/svg/639/639344.svg" alt="">
+    <img src="../../assets/login.png" alt="">
   </div>
-  <h2 class="center">What <b class="other">NXT</b></h2>
+  <h2 class="center">Messag<b class="other">io</b></h2>
 
   <div class="login-form">
     <h2 text-center>
@@ -21,7 +21,7 @@
         <ion-select class="text-secondary" [(ngModel)]="user.phoneNumber"  >
           <ion-select-option *ngFor= "let card of cards" value="{{card.phoneNumber}}">{{card.phoneNumber}}
           </ion-select-option>
-          <ion-select-option  value="9963219564">9963219564
+          <ion-select-option  value="6302342712">6302342712
           </ion-select-option>
         </ion-select>
       </ion-item>
@@ -40,7 +40,7 @@
 
     </ion-list>
 
-    <ion-button mode="ios" color="success" expand="block" (click)="login()">
+    <ion-button mode="ios" color="primary" expand="block" (click)="login()">
       Confirm
     </ion-button>
 

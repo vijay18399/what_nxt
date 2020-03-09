@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChildren } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Socket } from 'ngx-socket-io';
+import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import { ToastController, AlertController, ActionSheetController, Platform, LoadingController } from '@ionic/angular';
 import { ApiService } from '../../services/api.service';
 import { Storage } from '@ionic/storage';
@@ -12,6 +13,7 @@ import { FilePath } from '@ionic-native/file-path/ngx';
 import { ImagePicker } from '@ionic-native/image-picker/ngx';
 import { PreviewAnyFile } from '@ionic-native/preview-any-file';
 import { Downloader, NotificationVisibility } from '@ionic-native/downloader/ngx';
+
 import {
   MediaCapture,
   MediaFile,
@@ -23,12 +25,14 @@ import { StreamingMedia } from '@ionic-native/streaming-media/ngx';
 import { PhotoViewer } from '@ionic-native/photo-viewer/ngx';
 import { FileChooser } from '@ionic-native/file-chooser/ngx';
 import { DocumentViewer } from '@ionic-native/document-viewer/ngx';
+import { FileOpener } from '@ionic-native/file-opener/ngx';
+import { OCR, OCRSourceType, OCRResult } from '@ionic-native/ocr/ngx';
 
 //   ====>
-
-const API_STORAGE_KEY = 'specialkey';
 const MEDIA_FOLDER_NAME = 'temp';
+const API_STORAGE_KEY = 'specialkey';
 const MEDIA_SENDED_NAME = 'sent';
+
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.page.html',
@@ -36,6 +40,7 @@ const MEDIA_SENDED_NAME = 'sent';
 })
 
 export class ChatPage implements OnInit {
+  FileName = '';
   files = [];
   isTyping = false;
   TypingText = '';
@@ -48,9 +53,14 @@ export class ChatPage implements OnInit {
   TimeNow = new Date();
   muted = true;
   messages = [];
+  IsinPage=false;
+  
   // tslint:disable-next-line: max-line-length
   constructor(private imagePicker: ImagePicker,
+    private iab: InAppBrowser,
+    private ocr: OCR,
     private mediaCapture: MediaCapture,
+    private fileOpener: FileOpener,
     private file: File,
     private media: Media,
     private streamingMedia: StreamingMedia,
@@ -149,6 +159,7 @@ export class ChatPage implements OnInit {
     });
     this.socket.fromEvent(FromChannel).subscribe(message => {
       console.log('FromChannel');
+
       this.messages.push(message);
       if (!this.muted) {
         this.tts.speak(message['message'])
@@ -160,6 +171,7 @@ export class ChatPage implements OnInit {
     this.socket.fromEvent(ToChannel).subscribe(message => {
       // tslint:disable-next-line: no-string-literal
       console.log('ToChannel');
+
       this.messages.push(message);
       if (!this.muted) {
         this.tts.speak(message['message'])
@@ -168,11 +180,6 @@ export class ChatPage implements OnInit {
       }
       this.UpdateMessageInLocalStorage(true);
     });
-
-
-
-
-
   }
 
   loadFiles() {
@@ -194,14 +201,26 @@ export class ChatPage implements OnInit {
     });
   }
 
-  getSentiment(sentiment) {
-    if (sentiment > 0.5) {
+  getSentiment(message) {
+    
+    if (message.isTagged) {
+      if (message.TagName === 'Important') {
+        return 'primary';
+      } else if (message.TagName === 'Personal') {
+        return 'tertiary';
+      } else if (message.TagName === 'Confidential') {
+        return 'dark';
+      }
+    } else{
+    if (message.score > 0.5) {
       return 'success';
-    } else if (sentiment < 0.0) {
+    } else if (message.score < 0.0) {
       return 'danger';
     } else {
       return 'default';
     }
+
+  }
   }
   isspam(str) {
     if (str === 'spam') {
@@ -260,8 +279,8 @@ export class ChatPage implements OnInit {
 
   ShowMessage(message) {
     if (message.isBan === true) {
-      this.showToast('In Desiciplinary act');
-      this.tts.speak('In Desiciplinary act')
+      this.showToast('message cannot be sent');
+      this.tts.speak('message cannot be sent')
         .then(() => console.log('Success'))
         .catch((reason: any) => console.log(reason));
     } else if (!message.isfile) {
@@ -282,10 +301,14 @@ export class ChatPage implements OnInit {
     } else {
       if (message.type !== 'audio' && message.type !== 'video' && message.type !== 'image') {
         if (this.data.from === message.from) {
-          alert('Available at ' + message.myloc);
+          this.fileOpener.open(message.myloc, message.mimeType)
+         .then(() => console.log('File is opened'))
+        .catch(e =>   alert('Available at ' + message.myloc) );
         } else {
           if (message.isDownloaded) {
-            alert('Downloaded at ' + message.urloc);
+            this.fileOpener.open(message.urloc, message.mimeType)
+            .then(() => console.log('File is opened'))
+           .catch(e =>   alert('Available at ' + message.urloc) );
           } else {
             const request = {
               uri: 'https://letchat-upload.herokuapp.com/' + message['file'],
@@ -303,7 +326,9 @@ export class ChatPage implements OnInit {
               .then((location: string) => {
                 message.urloc = location;
                 this.socket.emit('downloaded', message);
-                alert('File downloaded at :' + location);
+                this.fileOpener.open(message.urloc, message.mimeType)
+            .then(() => console.log('File is opened'))
+           .catch(e =>   alert('File downloaded  at ' + message.urloc) );
               })
               .catch((error: any) => { alert(error); });
           }
@@ -387,6 +412,22 @@ export class ChatPage implements OnInit {
             }
           }
         }
+        ,
+        {
+          text: 'Recognize text in  Image ',
+          icon: 'images',
+          handler: () => {
+            if (data.isfile === true && data.type === 'image') {
+              if (data.from === this.data.from) {
+                this.Recognize(data.myloc);
+              } else {
+                this.Recognize(data.urloc);
+              }
+            } else {
+              alert('you can Recognize text in image files only');
+            }
+          }
+        }
         , {
           text: 'Translation',
           icon: 'language-outline',
@@ -419,20 +460,28 @@ export class ChatPage implements OnInit {
       finalize(() => loading.dismiss())
     )
       .subscribe(async res => {
-        console.log(res);
-        let message = '';
+      /*  console.log(res);
+        let message = '<ul>';
         if (res['length'] == 0) {
           message = 'No urls found';
         }
         for (let i = 0; i < res['length']; i++) {
-          message = message + `<ion-anchor (onclick)="open(res[i].url)"> ${res[i].url} is ${res[i].spamcheck} <ion-anchor/><br>`;
+          message = message + `<li (onclick)="browser(res[i].url)"> ${res[i].url} is ${res[i].spamcheck} <li/><br>`;
         }
+        message = message + '</ul>';
         const alert = await this.alertCtrl.create({
           header: 'Result',
           message,
           buttons: ['OK']
         });
-        await alert.present();
+        await alert.present();  */
+        const result = res;
+        const navigationExtras = {
+          state: {
+            result
+          }
+        };
+        this.router.navigate(['spam'], navigationExtras);
       }, async err => {
         const alert = await this.alertCtrl.create({
           header: 'error',
@@ -443,34 +492,484 @@ export class ChatPage implements OnInit {
       });
   }
 
-  async Translate(data) {
-    const loading = await this.loadingCtrl.create();
-    loading.present();
+  async Translate(x) {
+    const alert = await this.alertCtrl.create({
+      header: 'Select Languages to translate',
+      inputs: [
+        {
+          name: 'Hindi',
+          type: 'checkbox',
+          label: 'Hindi',
+          value: 'hi',
+          checked: false
+        },
 
-    this.apiService.Getoptions(data).pipe(
-      finalize(() => loading.dismiss())
-    )
-      .subscribe(async res => {
-        console.log(res);
-        if (res['error']) {
-          const alert = await this.alertCtrl.create({
-            header: 'Please Check Internet Connection',
-            message: res['msg'],
-            buttons: ['OK']
-          });
-          await alert.present();
-        } else {
-          const navigationExtras = {
-            state: {
-              res
-            }
-          };
-          this.router.navigate(['lang'], navigationExtras);
+        {
+          name: 'Telugu',
+          type: 'checkbox',
+          label: 'Telugu',
+          value: 'te'
+        },
+        {
+          name: 'English',
+          type: 'checkbox',
+          label: 'English',
+          value: 'en'
+        },
+        {
+          name: 'Afrikaans',
+          type: 'checkbox',
+          label: 'Afrikaans',
+          value: 'af'
+        },
+        {
+          name: 'Arabic',
+          type: 'checkbox',
+          label: 'Arabic',
+          value: 'ar'
+        },
+        {
+          name: 'Bulgarian',
+          type: 'checkbox',
+          label: 'Bulgarian',
+          value: 'bg'
+        },
+        {
+          name: 'Bangla',
+          type: 'checkbox',
+          label: 'Bangla',
+          value: 'bn'
+        },
+        {
+          name: 'Bosnian',
+          type: 'checkbox',
+          label: 'Bosnian',
+          value: 'bs'
+        },
+        {
+          name: 'Catalan',
+          type: 'checkbox',
+          label: 'Catalan',
+          value: 'ca'
+        },
+        {
+          name: 'Czech',
+          type: 'checkbox',
+          label: 'Czech',
+          value: 'cs'
+        },
+        {
+          name: 'Welsh',
+          type: 'checkbox',
+          label: 'Welsh',
+          value: 'cy'
+        },
+        {
+          name: 'Danish',
+          type: 'checkbox',
+          label: 'Danish',
+          value: 'da'
+        },
+        {
+          name: 'German',
+          type: 'checkbox',
+          label: 'German',
+          value: 'de'
+        },
+        {
+          name: 'Greek',
+          type: 'checkbox',
+          label: 'Greek',
+          value: 'el'
+        },
+        {
+          name: 'Spanish',
+          type: 'checkbox',
+          label: 'Spanish',
+          value: 'es'
+        },
+        {
+          name: 'Estonian',
+          type: 'checkbox',
+          label: 'Estonian',
+          value: 'et'
+        },
+        {
+          name: 'Persian',
+          type: 'checkbox',
+          label: 'Persian',
+          value: 'fa'
+        },
+        {
+          name: 'Finnish',
+          type: 'checkbox',
+          label: 'Finnish',
+          value: 'fi'
+        },
+        {
+          name: 'Filipino',
+          type: 'checkbox',
+          label: 'Filipino',
+          value: 'fil'
+        },
+        {
+          name: 'Fijian',
+          type: 'checkbox',
+          label: 'Fijian',
+          value: 'fj'
+        },
+        {
+          name: 'French',
+          type: 'checkbox',
+          label: 'French',
+          value: 'fr'
+        },
+        {
+          name: 'Irish',
+          type: 'checkbox',
+          label: 'Irish',
+          value: 'ga'
+        },
+        {
+          name: 'Hebrew',
+          type: 'checkbox',
+          label: 'Hebrew',
+          value: 'he'
+        },
+        {
+          name: 'Croatian',
+          type: 'checkbox',
+          label: 'Croatian',
+          value: 'hr'
+        },
+        {
+          name: 'Haitian Creole',
+          type: 'checkbox',
+          label: 'Haitian Creole',
+          value: 'ht'
+        },
+        {
+          name: 'Hungarian',
+          type: 'checkbox',
+          label: 'Hungarian',
+          value: 'hu'
+        },
+        {
+          name: 'Indonesian',
+          type: 'checkbox',
+          label: 'Indonesian',
+          value: 'id'
+        },
+        {
+          name: 'Icelandic',
+          type: 'checkbox',
+          label: 'Icelandic',
+          value: 'is'
+        },
+        {
+          name: 'Italian',
+          type: 'checkbox',
+          label: 'Italian',
+          value: 'it'
+        },
+        {
+          name: 'Japanese',
+          type: 'checkbox',
+          label: 'Japanese',
+          value: 'ja'
+        },
+        {
+          name: 'Kannada',
+          type: 'checkbox',
+          label: 'Kannada',
+          value: 'kn'
+        },
+        {
+          name: 'Korean',
+          type: 'checkbox',
+          label: 'Korean',
+          value: 'ko'
+        },
+        {
+          name: 'Lithuanian',
+          type: 'checkbox',
+          label: 'Lithuanian',
+          value: 'lt'
+        },
+        {
+          name: 'Latvian',
+          type: 'checkbox',
+          label: 'Latvian',
+          value: 'lt'
+        },
+        {
+          name: 'Malagasy',
+          type: 'checkbox',
+          label: 'Malagasy',
+          value: 'mg'
+        },
+        {
+          name: 'Maori',
+          type: 'checkbox',
+          label: 'Maori',
+          value: 'mi'
+        },
+        {
+          name: 'Malayalam',
+          type: 'checkbox',
+          label: 'Malayalam',
+          value: 'ml'
+        },
+        {
+          name: 'Malay',
+          type: 'checkbox',
+          label: 'Malay',
+          value: 'ms'
+        },
+        {
+          name: 'Maltese',
+          type: 'checkbox',
+          label: 'Maltese',
+          value: 'mt'
+        },
+        {
+          name: 'Hmong Daw',
+          type: 'checkbox',
+          label: 'Hmong Daw',
+          value: 'mww'
+        },
+        {
+          name: 'Norwegian',
+          type: 'checkbox',
+          label: 'Norwegian',
+          value: 'nb'
+        },
+        {
+          name: 'Dutch',
+          type: 'checkbox',
+          label: 'Dutch',
+          value: 'nl'
+        },
+        {
+          name: 'Querétaro Otomi',
+          type: 'checkbox',
+          label: 'Querétaro Otomi',
+          value: 'otq'
+        },
+        {
+          name: 'Punjabi',
+          type: 'checkbox',
+          label: 'Punjabi',
+          value: 'pa'
+        },
+        {
+          name: 'Polish',
+          type: 'checkbox',
+          label: 'Polish',
+          value: 'pl'
+        },
+        {
+          name: 'Portuguese (Brazil)',
+          type: 'checkbox',
+          label: 'Portuguese (Brazil)',
+          value: 'pt'
+        },
+        {
+          name: 'Portuguese (Portugal)',
+          type: 'checkbox',
+          label: 'Portuguese (Portugal)',
+          value: 'pt-pt'
+        },
+        {
+          name: 'Romanian',
+          type: 'checkbox',
+          label: 'Romanian',
+          value: 'ro'
+        },
+        {
+          name: 'Russian',
+          type: 'checkbox',
+          label: 'Russian',
+          value: 'ru'
+        },
+        {
+          name: 'Slovak',
+          type: 'checkbox',
+          label: 'Slovak',
+          value: 'sk'
+        },
+        {
+          name: 'Slovenian',
+          type: 'checkbox',
+          label: 'Slovenian',
+          value: 'sl'
+        },
+        {
+          name: 'Samoan',
+          type: 'checkbox',
+          label: 'Samoan',
+          value: 'sm'
+        },
+        {
+          name: 'Serbian (Cyrillic)',
+          type: 'checkbox',
+          label: 'Serbian (Cyrillic)',
+          value: 'sr-Cyrl'
+        },
+        {
+          name: 'Serbian (Latin)',
+          type: 'checkbox',
+          label: 'Serbian (Latin)',
+          value: 'sr-Latn'
+        },
+        {
+          name: 'Swedish',
+          type: 'checkbox',
+          label: 'Swedish',
+          value: 'sv'
+        },
+        {
+          name: 'Swahili',
+          type: 'checkbox',
+          label: 'Swahili',
+          value: 'sw'
+        },
+        {
+          name: 'Tamil',
+          type: 'checkbox',
+          label: 'Tamil',
+          value: 'ta'
+        },
+        {
+          name: 'Thai',
+          type: 'checkbox',
+          label: 'Thai',
+          value: 'th'
+        },
+        {
+          name: 'Klingon (Latin)',
+          type: 'checkbox',
+          label: 'Klingon (Latin)',
+          value: 'tlh-Latn'
+        },
+        {
+          name: 'Klingon (pIqaD)',
+          type: 'checkbox',
+          label: 'Klingon (pIqaD)',
+          value: 'tlh-Piqd'
+        },
+        {
+          name: 'Tongan',
+          type: 'checkbox',
+          label: 'Tongan',
+          value: 'to'
+        },
+        {
+          name: 'Turkish',
+          type: 'checkbox',
+          label: 'Turkish',
+          value: 'tr'
+        },
+        {
+          name: 'Tahitian',
+          type: 'checkbox',
+          label: 'Tahitian',
+          value: 'ty'
+        },
+        {
+          name: 'Ukrainian',
+          type: 'checkbox',
+          label: 'Ukrainian',
+          value: 'uk'
+        },
+        {
+          name: 'Urdu',
+          type: 'checkbox',
+          label: 'Urdu',
+          value: 'ur'
+        },
+        {
+          name: 'Vietnamese',
+          type: 'checkbox',
+          label: 'Vietnamese',
+          value: 'vi'
+        },
+        {
+          name: 'Yucatec Maya',
+          type: 'checkbox',
+          label: 'Yucatec Maya',
+          value: 'yua'
+        },
+        {
+          name: 'Cantonese (Traditional)',
+          type: 'checkbox',
+          label: 'Cantonese (Traditional)',
+          value: 'yue'
+        },
+        {
+          name: 'Chinese Simplified',
+          type: 'checkbox',
+          label: 'Chinese Simplified',
+          value: 'zh-Hans'
+        },
+        {
+          name: 'Chinese Traditional',
+          type: 'checkbox',
+          label: 'Chinese Traditional',
+          value: 'zh-Hant'
         }
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: () => {
+            console.log('Confirm Cancel');
+          }
+        }, {
+          text: 'Ok',
+          handler: (data) => {
+            const languages = data;
+            const text = x['message'];
+            this.StartTranslation(languages, text);
+          }
+        }
+      ]
+    });
 
-      });
+    await alert.present();
   }
 
+  async StartTranslation(languages, text) {
+  console.log(languages, text );
+  const loading = await this.loadingCtrl.create();
+  loading.present();
+
+  this.apiService.Translate(languages, text).pipe(
+    finalize(() => loading.dismiss())
+  )
+    .subscribe(async res => {
+      if (res['statusCode'] !== 200) {
+        const alert = await this.alertCtrl.create({
+          header: 'Please Check Internet Connection',
+          message: res['msg'],
+          buttons: ['OK']
+        });
+        await alert.present();
+      } else {
+        console.log(res);
+        const navigationExtras = {
+          state: {
+            res, text
+          }
+        };
+        this.router.navigate(['lang'], navigationExtras);
+      }
+
+    });
+
+  }
 
   async Tag(data) {
     const actionSheet = await this.actionSheetController.create({
@@ -627,8 +1126,7 @@ export class ChatPage implements OnInit {
     );
     this.file.copyFile(copyFrom, name, copyTo2, newName).then(
       success => {
-        let x = JSON.stringify(success);
-        alert(x);
+       console.log(success);
       },
       error => {
         console.log('error: ', error);
@@ -655,7 +1153,7 @@ export class ChatPage implements OnInit {
             this.file.copyFile(copyFrom, name, copyTo2, newName).then(
               success2 => {
                 let x = JSON.stringify(success2);
-                alert(x);
+                console.log(x);
               },
               error2 => {
                 console.log('error: ', error2);
@@ -750,7 +1248,7 @@ export class ChatPage implements OnInit {
           });
           await alert.present();
         } else {
-          const path = f.nativeURL.replace('temp', 'sent');
+          const path = f.nativeURL.replace(MEDIA_FOLDER_NAME, 'sent');
           let payload = {
             to: this.data.to,
             from: this.data.from,
@@ -781,7 +1279,7 @@ export class ChatPage implements OnInit {
   FileUpload() {
     this.fileChooser.open()
       .then((uri) => {
-        alert(uri);
+        console.log(uri);
         this.copyFileToLocalDir2(uri);
       })
       .catch(e => alert(e));
@@ -875,5 +1373,39 @@ export class ChatPage implements OnInit {
     };
     this.router.navigate(['filter'], navigationExtras);
   }
+  Recognize(uri) {
+    const url = uri;
+    this.ocr.recText(OCRSourceType.NORMFILEURL, uri)
+  .then((res: OCRResult) => {
+    const result = res;
+      alert(result);
+    const navigationExtras = {
+      state: {
+        result, url
+      }
+    };
+    this.router.navigate(['ocr'], navigationExtras);
+  })
+  .catch((error: any) => alert(error));
+  }
+  browser(url) {
+    console.log(url);
+    const tarea_regex = /^(http|https)/;
+    if (tarea_regex.test(url.toLowerCase()) === true) {
+      const browser = this.iab.create(url, '_system');
+    } else {
+      const browser = this.iab.create('https://' + url, '_system');
+    }
+  }
+  ionViewDidLeave() {
+    this.muted = false;
+    this.IsinPage=false;
+  }
+  ionViewWillEnter() {
+    this.IsinPage=true;
+}
+ngOnDestroy(){
+  alert('cl0sed');
+}
 
 }
