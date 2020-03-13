@@ -931,8 +931,13 @@ export class ChatPage implements OnInit {
           text: 'Ok',
           handler: (data) => {
             const languages = data;
-            const text = x['message'];
-            this.StartTranslation(languages, text);
+            if (languages.length==0) {
+              this.showToast('please Select Aleast 1 language ');
+            } else {
+              const text = x['message'];
+              this.StartTranslation(languages, text);
+            }
+            
           }
         }
       ]
@@ -1399,13 +1404,11 @@ export class ChatPage implements OnInit {
   }
   ionViewDidLeave() {
     this.muted = false;
-    this.IsinPage=false;
+    this.IsinPage = false;
   }
   ionViewWillEnter() {
-    this.IsinPage=true;
+    this.IsinPage = true;
 }
-ngOnDestroy(){
-  alert('cl0sed');
-}
+
 
 }

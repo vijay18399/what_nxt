@@ -16,9 +16,9 @@
   </ion-card-header>
   <ion-card-content>
     <div *ngFor= "let option of options; let k = index ">
-      <h6> {{option.name}}<b> ({{ ((option.score/group.members.length)*100).toFixed(2) }}%) </b>  <progress  value="{{option.score}}" max="{{count}}"> {{option.score}}% </progress>-{{option.score}} votes</h6>
+      <h6> {{option.name}}<b> ({{ ((option.score/group.members.length)*100).toFixed(2) }}%) </b>  <progress  value="{{option.score}}" max="{{count}}"> {{option.score}}% </progress>  <b>{{option.score}} votes</b></h6>
     <br>
-    <li *ngFor= "let item of option.votedby">{{ item.Name}} - {{ item.phoneNumber }}</li>  
+    <li *ngFor= "let item of option.votedby">{{ item.Name}}</li>  
     </div>
   </ion-card-content>
   </ion-card>
