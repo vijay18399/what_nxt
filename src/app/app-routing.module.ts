@@ -69,6 +69,10 @@ const routes: Routes = [
   {
     path: 'spam',
     loadChildren: () => import('./pages/spam/spam.module').then( m => m.SpamPageModule)
+  },
+  {
+    path: 'home',
+    loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
   }
 
  

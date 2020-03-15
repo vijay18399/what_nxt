@@ -20,10 +20,10 @@ export class SpamPage implements OnInit {
 
   ngOnInit() {
   }
-  open(url){
+  open(url) {
       console.log(url);
-      const tarea_regex = /^(http|https)/;
-      if (tarea_regex.test(url) === true) {
+      const Regex = /^(http|https)/;
+      if (Regex.test(url) === true) {
         const browser = this.iab.create(url, '_system');
       } else {
         const browser = this.iab.create('https://' + url, '_system');

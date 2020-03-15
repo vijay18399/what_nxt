@@ -86,6 +86,9 @@
           <ion-button color="tertiary" shape="round"  fill="outline"  icon-only  item-right (click)="FileUpload()">
             <ion-icon  name="folder"></ion-icon>
             </ion-button>
+            <ion-button  shape="round"  fill="outline"  icon-only  item-right (click)="Canvas()">
+              <ion-icon  name="color-palette"></ion-icon>
+              </ion-button>
           <ion-input  [(ngModel)]="data.message" placeholder="Type your message" type="text" (ionChange)="TypeChecker($event)" ></ion-input>
           
         </ion-item>

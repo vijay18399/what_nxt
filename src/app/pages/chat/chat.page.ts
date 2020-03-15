@@ -53,8 +53,7 @@ export class ChatPage implements OnInit {
   TimeNow = new Date();
   muted = true;
   messages = [];
-  IsinPage=false;
-  
+  IsinPage = false;
   // tslint:disable-next-line: max-line-length
   constructor(private imagePicker: ImagePicker,
     private iab: InAppBrowser,
@@ -460,21 +459,7 @@ export class ChatPage implements OnInit {
       finalize(() => loading.dismiss())
     )
       .subscribe(async res => {
-      /*  console.log(res);
-        let message = '<ul>';
-        if (res['length'] == 0) {
-          message = 'No urls found';
-        }
-        for (let i = 0; i < res['length']; i++) {
-          message = message + `<li (onclick)="browser(res[i].url)"> ${res[i].url} is ${res[i].spamcheck} <li/><br>`;
-        }
-        message = message + '</ul>';
-        const alert = await this.alertCtrl.create({
-          header: 'Result',
-          message,
-          buttons: ['OK']
-        });
-        await alert.present();  */
+        console.log(res);
         const result = res;
         const navigationExtras = {
           state: {
@@ -483,9 +468,10 @@ export class ChatPage implements OnInit {
         };
         this.router.navigate(['spam'], navigationExtras);
       }, async err => {
+        console.log(err); 
         const alert = await this.alertCtrl.create({
           header: 'error',
-          message: err.error.msg,
+          message: err.msg,
           buttons: ['OK']
         });
         await alert.present();
@@ -1409,6 +1395,14 @@ export class ChatPage implements OnInit {
   ionViewWillEnter() {
     this.IsinPage = true;
 }
-
+Canvas(){
+  const data = this.data;
+  const navigationExtras = {
+    state: {
+      data
+    }
+  };
+  this.router.navigate(['canvas'], navigationExtras);
+}
 
 }
