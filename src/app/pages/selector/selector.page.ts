@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Contacts } from '@ionic-native/contacts';
-import { Platform, AlertController } from '@ionic/angular';
+import { Platform, AlertController, ToastController } from '@ionic/angular';
 import { ApiService } from '../../services/api.service';
 import { LoadingController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -75,7 +75,7 @@ export class SelectorPage implements OnInit {
   x = '';
   groupname = '';
   // tslint:disable-next-line: max-line-length
-  constructor( private socket: Socket, private activatedRoute: ActivatedRoute, private alertController: AlertController, private router: Router, private contacts: Contacts, private apiService: ApiService, private plt: Platform, public loadingController: LoadingController) {
+  constructor( private socket: Socket, private toastCtrl: ToastController, private activatedRoute: ActivatedRoute, private alertController: AlertController, private router: Router, private contacts: Contacts, private apiService: ApiService, private plt: Platform, public loadingController: LoadingController) {
     this.activatedRoute.queryParams.subscribe(params => {
       if (this.router.getCurrentNavigation().extras.state) {
         this.groupname = this.router.getCurrentNavigation().extras.state.data.groupname;
@@ -164,44 +164,57 @@ export class SelectorPage implements OnInit {
   }
 
   async adder() {
-    const loading = await this.loadingController.create();
-    loading.present(); 
-    const member = {
-      name: this.admin['Name'],
-      phoneNumber: this.admin['phoneNumber']
-    };
-    this.members.push(member);
-    this.membercheck.push(this.admin['phoneNumber']);
-    let data = {
-      groupname: this.groupname,
-      members: this.members,
-      membercheck: this.membercheck,
-      admin: this.admin
-    };
-
-    this.apiService.CreateGroups(data).pipe()
-      .subscribe(res => {
-        if (res) {
-          loading.dismiss();
-          const r = 'tab/groups';
-         const isgroupCreated = true;
-          const navigationExtras = {
-            state: {
-              isgroupCreated
-            }
-          };
-           this.router.navigate([r], navigationExtras);
-        }
-      }, async err => {
-        const alert = await this.alertController.create({
-          header: 'Group Creation failed',
-          message: err.error.msg,
-          buttons: ['OK']
+    if (this.membercheck.length > 0) {
+      const loading = await this.loadingController.create();
+      loading.present(); 
+      const member = {
+        name: this.admin['Name'],
+        phoneNumber: this.admin['phoneNumber']
+      };
+      this.members.push(member);
+      this.membercheck.push(this.admin['phoneNumber']);
+      let data = {
+        groupname: this.groupname,
+        members: this.members,
+        membercheck: this.membercheck,
+        admin: this.admin
+      };
+  
+      this.apiService.CreateGroups(data).pipe()
+        .subscribe(res => {
+          if (res) {
+            loading.dismiss();
+            const r = 'tab/groups';
+           const isgroupCreated = true;
+            const navigationExtras = {
+              state: {
+                isgroupCreated
+              }
+            };
+             this.router.navigate([r], navigationExtras);
+          }
+        }, async err => {
+          const alert = await this.alertController.create({
+            header: 'Group Creation failed',
+            message: err.error.msg,
+            buttons: ['OK']
+          });
+          await alert.present();
         });
-        await alert.present();
-      });
+    } else {
+this.showToast("Atleast One Sould be in the group")
+    }
+
   }
 
 
+  async showToast(msg) {
+    const toast = await this.toastCtrl.create({
+      message: msg,
+      position: 'top',
+      duration: 2000
+    });
+    toast.present();
+  }
 
 }

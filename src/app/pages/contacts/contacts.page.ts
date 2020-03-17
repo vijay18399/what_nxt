@@ -67,12 +67,14 @@ export class ContactsPage implements OnInit {
     }
   ];
   x = '';
+  mydata = null;
   // tslint:disable-next-line: max-line-length
   constructor(private iab: InAppBrowser, private socket: Socket, private activatedRoute: ActivatedRoute, private router: Router, private contacts: Contacts, private apiService: ApiService, private plt: Platform, public loadingController: LoadingController) {
     this.activatedRoute.queryParams.subscribe(params => {
       if (this.router.getCurrentNavigation().extras.state) {
         this.users = this.router.getCurrentNavigation().extras.state.users;
         this.mynumber = this.router.getCurrentNavigation().extras.state.phoneNumber;
+        this.mydata = this.router.getCurrentNavigation().extras.state.mydata;
         this.x = JSON.stringify(this.users);
         console.log(this.users);
       }
@@ -122,12 +124,14 @@ logout() {
 open(contact) {
  const phoneNumber2 = this.Contactparser(contact._objectInstance.phoneNumbers[0].value);
  const phoneNumber = this.mynumber;
+ const mydata = this.mydata;
  const route = 'chat';
  const navigationExtras = {
   state: {
     contact,
     phoneNumber,
-    phoneNumber2
+    phoneNumber2,
+    mydata
   }
 };
  this.router.navigate([route], navigationExtras);

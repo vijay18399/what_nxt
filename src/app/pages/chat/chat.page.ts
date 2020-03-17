@@ -1,8 +1,8 @@
-import { Component, OnInit, ViewChildren } from '@angular/core';
+import { Component, OnInit, ViewChildren, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Socket } from 'ngx-socket-io';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
-import { ToastController, AlertController, ActionSheetController, Platform, LoadingController } from '@ionic/angular';
+import { ToastController, AlertController, ActionSheetController, Platform, LoadingController, IonContent } from '@ionic/angular';
 import { ApiService } from '../../services/api.service';
 import { Storage } from '@ionic/storage';
 import { finalize } from 'rxjs/operators';
@@ -54,6 +54,7 @@ export class ChatPage implements OnInit {
   muted = true;
   messages = [];
   IsinPage = false;
+  @ViewChild(IonContent, { read: IonContent, static: false }) myContent: IonContent;
   // tslint:disable-next-line: max-line-length
   constructor(private imagePicker: ImagePicker,
     private iab: InAppBrowser,
@@ -112,54 +113,55 @@ export class ChatPage implements OnInit {
     const FDeleteChannel = this.data.from + 'd' + this.data.to;
     const TDeleteChannel = this.data.to + 'd' + this.data.from;
     this.socket.fromEvent(TTagChannel).subscribe(message => {
-        console.log('TTagged');
-        this.loadData(true);
-        this.UpdateMessageInLocalStorage(true);
+      console.log('TTagged');
+      this.loadData(true);
+      this.UpdateMessageInLocalStorage(true);
     });
     this.socket.fromEvent(FTagChannel).subscribe(message => {
-        console.log('FTagged');
-        this.messages[message['index']] = message;
-        this.UpdateMessageInLocalStorage(true);
+      console.log('FTagged');
+      this.messages[message['index']] = message;
+      this.UpdateMessageInLocalStorage(true);
     });
     this.socket.fromEvent(TypingChannel).subscribe(message => {
-        console.log('TypingChannel');
-        this.isTyping = true;
-        this.TypingText = message['message'];
+      console.log('TypingChannel');
+      this.isTyping = true;
+      this.TypingText = message['message'];
     });
     this.socket.fromEvent(NTypingChannel).subscribe(message => {
-        console.log('NTypingChannel');
-        this.isTyping = false;
-        this.TypingText = '';
+      console.log('NTypingChannel');
+      this.isTyping = false;
+      this.TypingText = '';
     });
     this.socket.fromEvent(FSeenChannel).subscribe(message => {
-        console.log('FSeenChannel');
-        this.loadData(true);
-        this.UpdateMessageInLocalStorage(true);
+      console.log('FSeenChannel');
+      this.loadData(true);
+      this.UpdateMessageInLocalStorage(true);
     });
     this.socket.fromEvent(TSeenChannel).subscribe(message => {
       console.log('TSeenChannel');
       this.loadData(true);
       this.UpdateMessageInLocalStorage(true);
-  });
+    });
     this.socket.fromEvent(DownloadChannel).subscribe(message => {
       console.log('DownloadChannel');
       this.loadData(true);
       this.UpdateMessageInLocalStorage(true);
     });
     this.socket.fromEvent(FDeleteChannel).subscribe(message => {
-        console.log('FDeleteChannel');
-        this.messages[message['index']] = message;
-        this.UpdateMessageInLocalStorage(true);
+      console.log('FDeleteChannel');
+      this.messages[message['index']] = message;
+      this.loadData(true);
+      this.UpdateMessageInLocalStorage(true);
     });
     this.socket.fromEvent(TDeleteChannel).subscribe(message => {
-        console.log('TDeleteChannel');
-        this.loadData(true);
-        this.UpdateMessageInLocalStorage(true);
+      console.log('TDeleteChannel');
+      this.loadData(true);
+      this.UpdateMessageInLocalStorage(true);
     });
     this.socket.fromEvent(FromChannel).subscribe(message => {
       console.log('FromChannel');
-
       this.messages.push(message);
+      this.ScrollToBottom();
       if (!this.muted) {
         this.tts.speak(message['message'])
           .then(() => console.log('Success'))
@@ -170,8 +172,8 @@ export class ChatPage implements OnInit {
     this.socket.fromEvent(ToChannel).subscribe(message => {
       // tslint:disable-next-line: no-string-literal
       console.log('ToChannel');
-
       this.messages.push(message);
+      this.ScrollToBottom();
       if (!this.muted) {
         this.tts.speak(message['message'])
           .then(() => console.log('Success'))
@@ -179,6 +181,8 @@ export class ChatPage implements OnInit {
       }
       this.UpdateMessageInLocalStorage(true);
     });
+
+    this.ScrollToBottom();
   }
 
   loadFiles() {
@@ -201,7 +205,7 @@ export class ChatPage implements OnInit {
   }
 
   getSentiment(message) {
-    
+
     if (message.isTagged) {
       if (message.TagName === 'Important') {
         return 'primary';
@@ -210,16 +214,16 @@ export class ChatPage implements OnInit {
       } else if (message.TagName === 'Confidential') {
         return 'dark';
       }
-    } else{
-    if (message.score > 0.5) {
-      return 'success';
-    } else if (message.score < 0.0) {
-      return 'danger';
     } else {
-      return 'default';
-    }
+      if (message.score > 0.5) {
+        return 'success';
+      } else if (message.score < 0.0) {
+        return 'danger';
+      } else {
+        return 'default';
+      }
 
-  }
+    }
   }
   isspam(str) {
     if (str === 'spam') {
@@ -284,14 +288,14 @@ export class ChatPage implements OnInit {
         .catch((reason: any) => console.log(reason));
     } else if (!message.isfile) {
       if (message.from === this.data.from) {
-        if (!message.isDeletedByMe) {
+        if (!message.isDeletedByMe && !message.isDeletedForAll) {
           this.tts.speak(message.message)
             .then(() => console.log('Success'))
             .catch((reason: any) => console.log(reason));
         }
       } else {
 
-        if (!message.isDeletedByYou) {
+        if (!message.isDeletedByYou  && !message.isDeletedForAll) {
           this.tts.speak(message.message)
             .then(() => console.log('Success'))
             .catch((reason: any) => console.log(reason));
@@ -301,13 +305,13 @@ export class ChatPage implements OnInit {
       if (message.type !== 'audio' && message.type !== 'video' && message.type !== 'image') {
         if (this.data.from === message.from) {
           this.fileOpener.open(message.myloc, message.mimeType)
-         .then(() => console.log('File is opened'))
-        .catch(e =>   alert('Available at ' + message.myloc) );
+            .then(() => console.log('File is opened'))
+            .catch(e => alert('Available at ' + message.myloc));
         } else {
           if (message.isDownloaded) {
             this.fileOpener.open(message.urloc, message.mimeType)
-            .then(() => console.log('File is opened'))
-           .catch(e =>   alert('Available at ' + message.urloc) );
+              .then(() => console.log('File is opened'))
+              .catch(e => alert('Available at ' + message.urloc));
           } else {
             const request = {
               uri: 'https://letchat-upload.herokuapp.com/' + message['file'],
@@ -326,8 +330,8 @@ export class ChatPage implements OnInit {
                 message.urloc = location;
                 this.socket.emit('downloaded', message);
                 this.fileOpener.open(message.urloc, message.mimeType)
-            .then(() => console.log('File is opened'))
-           .catch(e =>   alert('File downloaded  at ' + message.urloc) );
+                  .then(() => console.log('File is opened'))
+                  .catch(e => alert('File downloaded  at ' + message.urloc));
               })
               .catch((error: any) => { alert(error); });
           }
@@ -380,7 +384,7 @@ export class ChatPage implements OnInit {
     }
   }
 
-  
+
   async presentActionSheet(data, i) {
 
     data.index = i;
@@ -468,7 +472,7 @@ export class ChatPage implements OnInit {
         };
         this.router.navigate(['spam'], navigationExtras);
       }, async err => {
-        console.log(err); 
+        console.log(err);
         const alert = await this.alertCtrl.create({
           header: 'error',
           message: err.msg,
@@ -917,13 +921,13 @@ export class ChatPage implements OnInit {
           text: 'Ok',
           handler: (data) => {
             const languages = data;
-            if (languages.length==0) {
+            if (languages.length == 0) {
               this.showToast('please Select Aleast 1 language ');
             } else {
               const text = x['message'];
               this.StartTranslation(languages, text);
             }
-            
+
           }
         }
       ]
@@ -933,32 +937,32 @@ export class ChatPage implements OnInit {
   }
 
   async StartTranslation(languages, text) {
-  console.log(languages, text );
-  const loading = await this.loadingCtrl.create();
-  loading.present();
+    console.log(languages, text);
+    const loading = await this.loadingCtrl.create();
+    loading.present();
 
-  this.apiService.Translate(languages, text).pipe(
-    finalize(() => loading.dismiss())
-  )
-    .subscribe(async res => {
-      if (res['statusCode'] !== 200) {
-        const alert = await this.alertCtrl.create({
-          header: 'Please Check Internet Connection',
-          message: res['msg'],
-          buttons: ['OK']
-        });
-        await alert.present();
-      } else {
-        console.log(res);
-        const navigationExtras = {
-          state: {
-            res, text
-          }
-        };
-        this.router.navigate(['lang'], navigationExtras);
-      }
+    this.apiService.Translate(languages, text).pipe(
+      finalize(() => loading.dismiss())
+    )
+      .subscribe(async res => {
+        if (res['statusCode'] !== 200) {
+          const alert = await this.alertCtrl.create({
+            header: 'Please Check Internet Connection',
+            message: res['msg'],
+            buttons: ['OK']
+          });
+          await alert.present();
+        } else {
+          console.log(res);
+          const navigationExtras = {
+            state: {
+              res, text
+            }
+          };
+          this.router.navigate(['lang'], navigationExtras);
+        }
 
-    });
+      });
 
   }
 
@@ -1117,7 +1121,7 @@ export class ChatPage implements OnInit {
     );
     this.file.copyFile(copyFrom, name, copyTo2, newName).then(
       success => {
-       console.log(success);
+        console.log(success);
       },
       error => {
         console.log('error: ', error);
@@ -1367,17 +1371,17 @@ export class ChatPage implements OnInit {
   Recognize(uri) {
     const url = uri;
     this.ocr.recText(OCRSourceType.NORMFILEURL, uri)
-  .then((res: OCRResult) => {
-    const result = res;
-      alert(result);
-    const navigationExtras = {
-      state: {
-        result, url
-      }
-    };
-    this.router.navigate(['ocr'], navigationExtras);
-  })
-  .catch((error: any) => alert(error));
+      .then((res: OCRResult) => {
+        const result = res;
+        alert(result);
+        const navigationExtras = {
+          state: {
+            result, url
+          }
+        };
+        this.router.navigate(['ocr'], navigationExtras);
+      })
+      .catch((error: any) => alert(error));
   }
   browser(url) {
     console.log(url);
@@ -1394,15 +1398,97 @@ export class ChatPage implements OnInit {
   }
   ionViewWillEnter() {
     this.IsinPage = true;
-}
-Canvas(){
-  const data = this.data;
-  const navigationExtras = {
-    state: {
-      data
+  }
+  Canvas() {
+    const data = this.data;
+    const navigationExtras = {
+      state: {
+        data
+      }
+    };
+    this.router.navigate(['canvas'], navigationExtras);
+  }
+  ScrollToBottom() {
+    setTimeout(() => {
+      this.myContent.scrollToBottom(300);
+    }, 1000);
+
+  }
+  WhatisThis(message) {
+    this.showToast(message.ext);
+    if (message.ext === 'ppt') { this.showToast('PowerPoint presentation'); }
+    if (message.ext === 'aif') { this.showToast('AIF audio file'); }
+    if (message.ext === 'cda') { this.showToast('CD audio track file'); }
+    if (message.ext === 'mid') { this.showToast('MIDI audio file'); }
+    if (message.ext === 'mp3') { this.showToast('MP3 audio file'); }
+    if (message.ext === 'mpa') { this.showToast('MPEG-2 audio file'); }
+    if (message.ext === 'ogg') { this.showToast('Ogg Vorbis audio file'); }
+    if (message.ext === 'wav') { this.showToast('WAV file'); }
+    if (message.ext === 'wma') { this.showToast('WMA audio file'); }
+    if (message.ext === 'wpl') { this.showToast('Windows Media Player playlist'); }
+    if (message.ext === '7z') { this.showToast('7-Zip compressed file'); }
+    if (message.ext === 'arj') { this.showToast('ARJ compressed file'); }
+    if (message.ext === 'deb') { this.showToast('Debian software package file'); }
+    if (message.ext === 'pkg') { this.showToast('Package file'); }
+    if (message.ext === 'rar') { this.showToast('RAR file'); }
+    if (message.ext === 'rpm') { this.showToast('Red Hat Package Manager'); }
+    if (message.ext === 'tar.gz') { this.showToast('Tarball compressed file'); }
+    if (message.ext === 'z') { this.showToast('Z compressed file'); }
+    if (message.ext === 'zip') { this.showToast('Zip compressed file'); }
+    if (message.ext === 'bin') { this.showToast('Binary disc image'); }
+    if (message.ext === 'dmg') { this.showToast('macOS X disk image'); }
+    if (message.ext === 'iso') { this.showToast('ISO disc image'); }
+    if (message.ext === 'toast') { this.showToast('Toast disc image'); }
+    if (message.ext === 'vcd') { this.showToast(' Virtual CD'); }
+    if (message.ext === 'csv') { this.showToast('Comma separated value file'); }
+    if (message.ext === 'dat ') { this.showToast('Data file'); }
+    if (message.ext === 'sql') { this.showToast('SQL database file'); }
+    if (message.ext === 'xml') { this.showToast('XML file'); }
+    if (message.ext === 'apk') { this.showToast('Android package file'); }
+    if (message.ext === 'exe') { this.showToast('Executable file'); }
+    if (message.ext === 'py') { this.showToast('Python file'); }
+    if (message.ext === 'gif') { this.showToast(' GIF image'); }
+    if (message.ext === 'jpeg') { this.showToast('JPEG image'); }
+    if (message.ext === 'jpg') { this.showToast('JPEG image'); }
+    if (message.ext === 'png') { this.showToast('PNG image'); }
+    if (message.ext === 'js') { this.showToast('JavaScript file'); }
+    if (message.ext === 'css') { this.showToast('Cascading Style Sheet file'); }
+    if (message.ext === 'html') { this.showToast('HTML file'); }
+    if (message.ext === 'c') { this.showToast(' C and C++ source code file'); }
+    if (message.ext === 'cpp') { this.showToast('C++ source code file'); }
+    if (message.ext === 'class') { this.showToast('Java class file'); }
+    if (message.ext === 'cs') { this.showToast('Visual C# source code file'); }
+    if (message.ext === 'java') { this.showToast('Java Source code file'); }
+    if (message.ext === 'pl') { this.showToast('Perl script file'); }
+    if (message.ext === 'sh') { this.showToast('Bash shell script'); }
+    if (message.ext === 'swift') { this.showToast('Swift source code file'); }
+    if (message.ext === 'xlsx') { this.showToast('Microsoft Excel Open XML spreadsheet file'); }
+    if (message.ext === 'xls') { this.showToast('Microsoft Excel file'); }
+    if (message.ext === '3gp') { this.showToast('3GPP multimedia file'); }
+    if (message.ext === 'avi') { this.showToast('AVI file'); }
+    if (message.ext === 'mkv') { this.showToast('Matroska Multimedia Container'); }
+    if (message.ext === 'mp4') { this.showToast('MPEG4 video file'); }
+    if (message.ext === 'wmv') { this.showToast('Windows Media Video file'); }
+    if (message.ext === 'pdf') { this.showToast('PDF file'); }
+    if (message.ext === 'docx') { this.showToast('Microsoft Word file'); }
+    if (message.ext === 'doc') { this.showToast('Microsoft Word file'); }
+    if (message.ext === 'aspx') { this.showToast(' Active Server Page file'); }
+    if (message.ext === 'asp') { this.showToast(' Active Server Page file'); }
+    if (message.ext === 'jsp') { this.showToast('Java Server Page file'); }
+    if (message.ext === 'php') { this.showToast('PHP file'); }
+    if (message.ext === 'rss') { this.showToast('RSS file'); }
+  }
+  option(message) {
+    const x = new Date().getTime() - new Date(message.createdAt).getTime();
+    if (Math.round(((x % 86400000) % 3600000) / 60000) <= 10) {
+      return true;
+    } else {
+      return false;
     }
-  };
-  this.router.navigate(['canvas'], navigationExtras);
-}
+  }
+  Delete(data) {
+    data.Option = 'isDeletedForAll';
+    this.socket.emit('deleted', data);
+  }
 
 }

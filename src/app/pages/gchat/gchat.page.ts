@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewChildren } from '@angular/core';
+import { Component, OnInit, ViewChildren, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Socket } from 'ngx-socket-io';
-import { ToastController, AlertController, ActionSheetController, Platform, LoadingController } from '@ionic/angular';
+import { ToastController, AlertController, ActionSheetController, Platform, LoadingController, IonContent } from '@ionic/angular';
 import { ApiService } from '../../services/api.service';
 import { Storage } from '@ionic/storage';
 import { finalize } from 'rxjs/operators';
@@ -37,7 +37,7 @@ const MEDIA_FOLDER_NAME = 'temp';
   styleUrls: ['./gchat.page.scss'],
 })
 export class GchatPage implements OnInit {
-
+  @ViewChild(IonContent, {read: IonContent, static: false}) myContent: IonContent;
   files = [];
   isTyping = false;
   TypingText = '';
@@ -91,17 +91,19 @@ export class GchatPage implements OnInit {
     this.loadData(true);
     const GroupChannel = this.data.groupid;
     const VoteChannel = this.data.groupid + 'voted';
-    const GroupDeleteChannel = 'gdeleted' + this.data.from;
+    const GroupDeleteChannel = 'gdeleted' + this.data.groupid;
     this.socket.fromEvent(GroupChannel).subscribe(message => {
       console.log('GroupChannel');
       this.messages.push(message);
+      this.ScrollToBottom();
       this.loadData(true);
+     
       this.UpdateMessageInLocalStorage(true);
     });
     this.socket.fromEvent(GroupDeleteChannel).subscribe(message => {
       console.log('GroupDeleteChannel');
-      this.messages[message['index']] = message;
-      // this.loadData(true);
+     // this.messages[message['index']] = message;
+       this.loadData(true);
       this.UpdateMessageInLocalStorage(true);
     });
     this.socket.fromEvent('gtagged').subscribe(message => {
@@ -134,7 +136,7 @@ export class GchatPage implements OnInit {
     });
     this.loadData(true);
 
-
+    this.ScrollToBottom();
   }
 
   loadFiles() {
@@ -1215,12 +1217,12 @@ export class GchatPage implements OnInit {
         .catch((reason: any) => console.log(reason));
     } else if (!message.isfile) {
       if (message.from === this.data.from) {
-        if (!message.isDeletedByMe) {
+        if (!message.isDeletedByMe  && !message.isDeletedForAll) {
           this.tts.speak(message.message)
             .then(() => console.log('Success'))
             .catch((reason: any) => console.log(reason));
         }
-      } else {
+      } else if (!message.isDeletedForAll) {
         this.tts.speak(message.message)
           .then(() => console.log('Success'))
           .catch((reason: any) => console.log(reason));
@@ -1337,6 +1339,24 @@ export class GchatPage implements OnInit {
     } else {
       const browser = this.iab.create('https://' + url, '_system');
     }
+  }
+  ScrollToBottom(){
+    setTimeout(() => {
+      this.myContent.scrollToBottom(300);
+   }, 1000);
+
+  }
+  option(message) {
+    const x = new Date().getTime() - new Date(message.createdAt).getTime();
+    if (Math.round(((x % 86400000) % 3600000) / 60000) <= 10) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  Delete(data) {
+    data.Option = 'isDeletedForAll';
+    this.socket.emit('gdeleted', data);
   }
 
 }

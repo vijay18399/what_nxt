@@ -30,7 +30,8 @@ const routes: Routes = [
     path: 'tab',
     loadChildren: () => import('./pages/tab/tab.module').then( m => m.TabPageModule),
     canActivate: [AuthGuard]
-  },  {
+  },
+  {
     path: 'selector',
     loadChildren: () => import('./pages/selector/selector.module').then( m => m.SelectorPageModule)
   },
@@ -69,10 +70,6 @@ const routes: Routes = [
   {
     path: 'spam',
     loadChildren: () => import('./pages/spam/spam.module').then( m => m.SpamPageModule)
-  },
-  {
-    path: 'home',
-    loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
   }
 
  

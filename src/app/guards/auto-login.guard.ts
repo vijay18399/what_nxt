@@ -32,13 +32,15 @@ export class AutoLoginGuard implements CanActivate {
         } else {
           this.api.getUsers(true).subscribe(res => {
             this.users = res;
-            const phoneNumber = this.api.getUserData();
+            const mydata = this.api.getUser();
+            const phoneNumber =  mydata['phoneNumber'];
             const r = 'tab/contacts';
             const users = this.users;
             const navigationExtras = {
               state: {
                 users,
-                phoneNumber
+                phoneNumber,
+                mydata
               }
             };
             console.log(this.users);

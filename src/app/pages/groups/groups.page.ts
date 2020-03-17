@@ -103,14 +103,19 @@ export class GroupsPage implements OnInit {
         }, {
           text: 'Ok',
           handler: (data) => {
-            const admin = this.user;
-            const users = this.users;
-            const navigationExtras = {
-              state: {
-                data, admin, users
-              }
-            };
-            this.router.navigate(['selector'], navigationExtras);
+            if (data.groupname) {
+              const admin = this.user;
+              const users = this.users;
+              const navigationExtras = {
+                state: {
+                  data, admin, users
+                }
+              };
+              this.router.navigate(['selector'], navigationExtras);
+            } else {
+                   this.showToast('Group Cannot be created without name');
+            }
+
           }
         }
       ]

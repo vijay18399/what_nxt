@@ -63,11 +63,13 @@ export class LoginPage implements OnInit {
             const decoded = helper.decodeToken(res);
             const r = 'tab/contacts';
             const users = this.users;
+            const mydata = decoded;
             const phoneNumber = decoded['phoneNumber'];
             const navigationExtras = {
               state: {
                 users,
-                phoneNumber
+                phoneNumber,
+                mydata
               }
             };
             this.router.navigate([r], navigationExtras);

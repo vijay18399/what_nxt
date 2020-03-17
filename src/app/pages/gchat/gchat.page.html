@@ -29,13 +29,14 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="bg">
+<ion-content #content class="bg">
   <ion-grid  >
     <ion-row *ngFor="let message of messages; let i = index">
       <ion-col  (click)="ShowMessage(message)"     size="9" (press)="presentActionSheet(message,i)"   *ngIf="message.from !== user.phoneNumber && !message.isBan" class="{{ getSentiment(message) }} message ">
         
       
         <p  class="small-left"   ><small>{{ message.name }}</small></p>
+  
         <p  class="small-right" *ngIf="message.isTagged" color="getColor(message.TagName)" ><small>   {{ message.TagName }}</small></p>
         <div *ngIf="message.isForm && !message.isDeletedByMe">
           <div *ngIf="message.voters.includes(user.phoneNumber)" >
@@ -56,10 +57,10 @@
               vote for {{ option.name}}</ion-button>
           </div>
         </div>
-        <img *ngIf="message.isfile"  height='25px' src="../../assets/{{message.ext}}.png" > 
+        <img *ngIf="message.isfile"  height='25px' src="./assets/{{message.ext}}.png" > 
       
        
-        <span  >{{ message.message }} {{ message.original }}   </span>   <span class="text-muted" *ngIf="message.isDeletedByYou"  >Message Deleted  </span><img *ngIf="isspam(message.spamcheck)"  height='30px' src="https://image.flaticon.com/icons/svg/564/564619.svg" >
+        <span *ngIf="!message.isDeletedForAll" >{{ message.message }} {{ message.original }}  </span> <span class="text-muted" *ngIf="message.isDeletedForAll"  >Message Deleted  </span><img *ngIf="isspam(message.spamcheck)"  height='30px' src="https://image.flaticon.com/icons/svg/564/564619.svg" >
         <img *ngIf="isbirthday(message.message)"  height='30px' src="https://image.flaticon.com/icons/svg/2451/2451787.svg" > 
         <img *ngIf="iscongratulation(message.message)"  height='130px' src="https://image.flaticon.com/icons/png/512/1629/1629891.png" > 
         
@@ -91,9 +92,11 @@
         </div>
         <img *ngIf="!message.isDeletedByMe && message.isfile "  height='25px' src="../../assets/{{message.ext}}.png" > 
      
-              <span *ngIf="!message.isDeletedByMe" >{{ message.message }} {{ message.original }}  </span> <span class="text-muted" *ngIf="message.isDeletedByMe"  >Message Deleted  </span>
+              <span *ngIf="!message.isDeletedByMe && !message.isDeletedForAll" >{{ message.message }} {{ message.original }}  </span> <span class="text-muted" *ngIf="message.isDeletedByMe  || message.isDeletedForAll"  >Message Deleted  </span>
               <img *ngIf="message.isBan"   height='30px' src="https://image.flaticon.com/icons/svg/564/564619.svg" >
-        <div class="time" text-right><br>{{ message.createdAt | date:'short' }} </div>
+              <ion-button *ngIf="option(message) && !message.isDeletedForAll" (click)="Delete(message)" color="danger"  size="small" class="shadow" shape="round"> <ion-icon  slot="icon-only"     name="trash"></ion-icon>
+              </ion-button>
+              <div class="time" text-right><br>{{ message.createdAt | date:'short' }} </div>
       </ion-col>
     </ion-row>
   </ion-grid>
