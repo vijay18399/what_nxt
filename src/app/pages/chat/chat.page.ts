@@ -13,6 +13,7 @@ import { FilePath } from '@ionic-native/file-path/ngx';
 import { ImagePicker } from '@ionic-native/image-picker/ngx';
 import { PreviewAnyFile } from '@ionic-native/preview-any-file';
 import { Downloader, NotificationVisibility } from '@ionic-native/downloader/ngx';
+import { LocalNotifications } from '@ionic-native/Local-Notifications/ngx';
 
 import {
   MediaCapture,
@@ -48,8 +49,10 @@ export class ChatPage implements OnInit {
   data = {
     to: '',
     from: '',
-    message: ''
+    message: '',
+    name: ''
   };
+  count = 0;
   TimeNow = new Date();
   muted = true;
   messages = [];
@@ -57,6 +60,7 @@ export class ChatPage implements OnInit {
   @ViewChild(IonContent, { read: IonContent, static: false }) myContent: IonContent;
   // tslint:disable-next-line: max-line-length
   constructor(private imagePicker: ImagePicker,
+    private localNotifications: LocalNotifications,
     private iab: InAppBrowser,
     private ocr: OCR,
     private mediaCapture: MediaCapture,
@@ -75,6 +79,7 @@ export class ChatPage implements OnInit {
         this.userdata = this.router.getCurrentNavigation().extras.state.contact;
         this.data.from = this.router.getCurrentNavigation().extras.state.phoneNumber;
         this.data.to = this.router.getCurrentNavigation().extras.state.phoneNumber2;
+        this.data.name = this.router.getCurrentNavigation().extras.state.mydata["Name"];
       }
     });
 
@@ -168,6 +173,7 @@ export class ChatPage implements OnInit {
           .catch((reason: any) => console.log(reason));
       }
       this.UpdateMessageInLocalStorage(true);
+
     });
     this.socket.fromEvent(ToChannel).subscribe(message => {
       // tslint:disable-next-line: no-string-literal
@@ -178,6 +184,16 @@ export class ChatPage implements OnInit {
         this.tts.speak(message['message'])
           .then(() => console.log('Success'))
           .catch((reason: any) => console.log(reason));
+      }
+      if (!this.IsinPage) {
+        console.log('localNotifications');
+        this.localNotifications.schedule({
+          id: Math.ceil(Math.random() * 10),
+          title: 'message from ' + message['name'],
+          text: message['message'],
+          sound: './assets/bell.mp3',
+          data: message
+        });
       }
       this.UpdateMessageInLocalStorage(true);
     });
@@ -281,6 +297,7 @@ export class ChatPage implements OnInit {
   }
 
   ShowMessage(message) {
+if (!message.isDeletedForAll) {
     if (message.isBan === true) {
       this.showToast('message cannot be sent');
       this.tts.speak('message cannot be sent')
@@ -295,7 +312,7 @@ export class ChatPage implements OnInit {
         }
       } else {
 
-        if (!message.isDeletedByYou  && !message.isDeletedForAll) {
+        if (!message.isDeletedByYou && !message.isDeletedForAll) {
           this.tts.speak(message.message)
             .then(() => console.log('Success'))
             .catch((reason: any) => console.log(reason));
@@ -371,7 +388,7 @@ export class ChatPage implements OnInit {
       }
     }
 
-  }
+  }}
 
 
   TypeChecker(ev: CustomEvent) {
@@ -1373,13 +1390,17 @@ export class ChatPage implements OnInit {
     this.ocr.recText(OCRSourceType.NORMFILEURL, uri)
       .then((res: OCRResult) => {
         const result = res;
-        alert(result);
+        if (result['foundText'] === false) {
+               alert("No text found");
+        } else {
         const navigationExtras = {
           state: {
             result, url
           }
         };
         this.router.navigate(['ocr'], navigationExtras);
+      }
+
       })
       .catch((error: any) => alert(error));
   }
@@ -1393,7 +1414,7 @@ export class ChatPage implements OnInit {
     }
   }
   ionViewDidLeave() {
-    this.muted = false;
+    this.muted = true;
     this.IsinPage = false;
   }
   ionViewWillEnter() {
@@ -1480,7 +1501,8 @@ export class ChatPage implements OnInit {
   }
   option(message) {
     const x = new Date().getTime() - new Date(message.createdAt).getTime();
-    if (Math.round(((x % 86400000) % 3600000) / 60000) <= 10) {
+
+    if (Math.round(x / 60000) <= 10) {
       return true;
     } else {
       return false;

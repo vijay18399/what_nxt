@@ -13,6 +13,7 @@ import { ImagePicker } from '@ionic-native/image-picker/ngx';
 import { PreviewAnyFile } from '@ionic-native/preview-any-file';
 import { Downloader, NotificationVisibility } from '@ionic-native/downloader/ngx';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
+import { LocalNotifications } from '@ionic-native/Local-Notifications/ngx';
 import {
   MediaCapture,
   MediaFile,
@@ -58,10 +59,11 @@ export class GchatPage implements OnInit {
   count = null;
   FileName = '';
   x = '';
-
+  IsinPage = false;
   // tslint:disable-next-line: max-line-length
   constructor(private iab: InAppBrowser, private imagePicker: ImagePicker,
     private mediaCapture: MediaCapture,
+    private localNotifications: LocalNotifications,
     private file: File,
     private media: Media,
     private streamingMedia: StreamingMedia,
@@ -97,7 +99,19 @@ export class GchatPage implements OnInit {
       this.messages.push(message);
       this.ScrollToBottom();
       this.loadData(true);
-     
+      if (!this.IsinPage) {
+        if (message['from'] !== this.data.from) {
+          console.log('localNotifications');
+          this.localNotifications.schedule({
+            id: Math.ceil(Math.random() * 10),
+            title: this.groupname + ' message from ' + message['name'] ,
+            text: message['message'],
+            sound:  './assets/bell.mp3',
+            data: message
+          });
+        }
+    
+      }
       this.UpdateMessageInLocalStorage(true);
     });
     this.socket.fromEvent(GroupDeleteChannel).subscribe(message => {
@@ -1210,6 +1224,7 @@ export class GchatPage implements OnInit {
     this.router.navigate(['filter'], navigationExtras);
   }
   ShowMessage(message) {
+    if (!message.isDeletedForAll) {
     if (message.isBan === true) {
       this.showToast('In Desiciplinary act');
       this.tts.speak('In Desiciplinary act')
@@ -1281,6 +1296,7 @@ export class GchatPage implements OnInit {
     }
 
   }
+}
   Form() {
     const data = this.data;
     const navigationExtras = {
@@ -1358,5 +1374,12 @@ export class GchatPage implements OnInit {
     data.Option = 'isDeletedForAll';
     this.socket.emit('gdeleted', data);
   }
-
+  ionViewDidLeave() {
+    this.muted = true;
+    this.IsinPage = false;
+  }
+  ionViewWillEnter() {
+    this.IsinPage = true;
+    this.muted = false;
+  }
 }

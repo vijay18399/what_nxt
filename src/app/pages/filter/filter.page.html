@@ -1,11 +1,11 @@
 <ion-header>
-  <ion-toolbar color="tertiary">
+  <ion-toolbar color="primary">
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-avatar slot="start" class="contact-avatar">
-      <img *ngIf="name"  src="https://ui-avatars.com/api/?name={{ name }}&background=02a9f4&color=fff" />
-      <img  *ngIf="groupname" src="https://ui-avatars.com/api/?name={{ groupname }}&background=e91e63&color=fff" />
+      <img *ngIf="name"  src="https://ui-avatars.com/api/?name={{ name }}&background=fff&color=02a9f4" />
+      <img  *ngIf="groupname" src="https://ui-avatars.com/api/?name={{ groupname }}&background=fff&color=02a9f4" />
     </ion-avatar>
     <ion-title (tap)="showContactProfile()">
       <ion-label>

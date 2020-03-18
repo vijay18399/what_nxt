@@ -1,12 +1,12 @@
 <ion-header   >
-  <ion-toolbar color="white">
+  <ion-toolbar color="primary">
     <ion-buttons slot="start">
       <ion-button (click)="back()">
         <ion-icon name="arrow-back-circle-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
     <ion-avatar slot="start" class="contact-avatar">
-      <img src="https://ui-avatars.com/api/?name={{ groupname }}&background=e91e63&color=fff" />
+      <img src="https://ui-avatars.com/api/?name={{ groupname }}&background=fff&color=02a9f4" />
     </ion-avatar>
     <ion-title  (click)="ginfo()">
       <ion-label>
@@ -42,14 +42,14 @@
           <div *ngIf="message.voters.includes(user.phoneNumber)" >
             <b>{{message.question}}</b><br>
             
-           <div *ngFor= "let option of message.options; let k = index ">
-            <h6  > {{option.name}}<b> ( {{ ((option.score/count)*100).toFixed(2) }} % ) </b> <progress  value="{{option.score}}" max="{{count}}"> {{option.score}}% </progress></h6>  
-
-          </div>
-          <div>
-            <ion-button  size="small"  color="tertiary" (click)="result(message)">
-              Complete Analysis</ion-button>
-          </div>
+            <div *ngFor= "let option of message.options; let k = index ">
+             <h6>{{option.name}}</h6><h6><progress  value="{{option.score}}" max="{{count}}">  </progress><b>( {{ option.score }} Votes  )</b></h6>  
+ 
+           </div>
+            <div>
+              <ion-button  size="small"  color="tertiary" (click)="result(message)">
+                Complete Analysis</ion-button>
+            </div>
           </div>
           <div *ngIf="!message.voters.includes(user.phoneNumber)" >
             <h2>{{message.question}}</h2><br>
@@ -75,10 +75,11 @@
         <div *ngIf="message.isForm && !message.isDeletedByMe">
           <div *ngIf="message.voters.includes(user.phoneNumber)" >
             <b>{{message.question}}</b><br>
+            
             <div *ngFor= "let option of message.options; let k = index ">
-              <h6  > {{option.name}}<b> ( {{ ((option.score/count)*100).toFixed(2) }} % ) </b>  <progress  value="{{option.score}}" max="{{count}}"> {{option.score}}% </progress></h6>
-          
-            </div>
+             <h6>{{option.name}}</h6><h6><progress  value="{{option.score}}" max="{{count}}">  </progress><b>( {{ option.score }} Votes  )</b></h6>  
+ 
+           </div>
             <div>
               <ion-button  size="small"  color="tertiary" (click)="result(message)">
                 Complete Analysis</ion-button>

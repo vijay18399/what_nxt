@@ -1,10 +1,10 @@
 <ion-header>
-  <ion-toolbar color="white">
+  <ion-toolbar color="primary">
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-avatar slot="start" class="contact-avatar">
-      <img src="https://ui-avatars.com/api/?name={{ userdata._objectInstance.displayName }}&background=02a9f4&color=fff" />
+      <img src="https://ui-avatars.com/api/?name={{ userdata._objectInstance.displayName }}&background=fff&color=02a9f4" />
     </ion-avatar>
     <ion-title (tap)="showContactProfile()">
       <ion-label>
@@ -48,7 +48,7 @@
               <span *ngIf="!message.isDeletedByMe && !message.isDeletedForAll" >{{ message.message }} {{ message.original }}  </span> <span class="text-muted" *ngIf="message.isDeletedByMe || message.isDeletedForAll"  >Message Deleted  </span>
               <img *ngIf="message.isBan"   height='30px' src="https://image.flaticon.com/icons/svg/564/564619.svg" >
              <ion-button *ngIf="option(message) && !message.isDeletedForAll" (click)="Delete(message)" color="danger"  size="small" class="shadow" shape="round"> <ion-icon  slot="icon-only"     name="trash"></ion-icon>
-              </ion-button>
+            </ion-button>
               <div class="time"  text-right><br>{{ message.createdAt | date:'short' }}  </div>
       </ion-col>
     </ion-row>

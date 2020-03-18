@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-toolbar color="success">
+  <ion-toolbar color="primary">
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
@@ -16,9 +16,16 @@
   </ion-card-header>
   <ion-card-content>
     <div *ngFor= "let option of options; let k = index ">
-      <h6> {{option.name}}<b> ({{ ((option.score/group.members.length)*100).toFixed(2) }}%) </b>  <progress  value="{{option.score}}" max="{{count}}"> {{option.score}}% </progress>  <b>{{option.score}} votes</b></h6>
-    <br>
-    <li *ngFor= "let item of option.votedby">{{ item.Name}}</li>  
+      <ion-list>
+        <ion-list-header>
+        <h2><b>  {{option.name}} ({{ ((option.score/group.members.length)*100).toFixed(2) }}%) [vote share  {{ option.score}} ]  </b></h2> 
+        </ion-list-header>
+      <ion-item *ngFor= "let item of option.votedby; let p = index " >
+        <ion-label>
+          <h6>{{ p+1 }} {{ item.Name}}</h6>
+        </ion-label>
+      </ion-item>
+        </ion-list>
     </div>
   </ion-card-content>
   </ion-card>

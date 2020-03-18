@@ -46,7 +46,6 @@ export class OcrPage implements OnInit {
   }
   copy() {
     this.clipboard.copy(this.FinalResult);
-    alert('copied to clipboard');
   }
 
   open(url) {
@@ -64,7 +63,6 @@ export class OcrPage implements OnInit {
   }
   copier(url) {
     this.clipboard.copy(url.raw);
-    alert('copied to clipboard');
   }
   openNumber(num) {
     this.callNumber.callNumber(num, true)

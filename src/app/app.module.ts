@@ -34,7 +34,7 @@ import { BrowserTab } from '@ionic-native/browser-tab/ngx';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import { Base64ToGallery } from '@ionic-native/base64-to-gallery/ngx';
 import { CallNumber } from '@ionic-native/call-number/ngx';
-
+import { LocalNotifications } from '@ionic-native/Local-Notifications/ngx';
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
@@ -43,6 +43,7 @@ import { CallNumber } from '@ionic-native/call-number/ngx';
     Contacts,
     CallNumber,
     BrowserTab,
+    LocalNotifications,
     Base64ToGallery,
     Sim,
     OCR,
